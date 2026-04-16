@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.1](https://github.com/openapi-ruby/openapi-ruby/compare/v2.3.0...v2.3.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* allow same-named components during initial loading before scope assignment ([49b1d82](https://github.com/openapi-ruby/openapi-ruby/commit/49b1d82e9959c2f1549d05c38024ea2a6101fcce))
+* only check for duplicates when both sides have explicitly set their scopes. ([49b1d82](https://github.com/openapi-ruby/openapi-ruby/commit/49b1d82e9959c2f1549d05c38024ea2a6101fcce))
+* update duplicate detection test to use explicit scopes ([f081f8d](https://github.com/openapi-ruby/openapi-ruby/commit/f081f8d4cfaa9923d84da1281be1f5dc3e9933e2))
+
 ## [2.3.0](https://github.com/openapi-ruby/openapi-ruby/compare/v2.2.1...v2.3.0) (2026-04-16)
 
 
