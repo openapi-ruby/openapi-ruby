@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.4.0](https://github.com/openapi-ruby/openapi-ruby/compare/v2.3.1...v2.4.0) (2026-04-16)
+
+
+### Features
+
+* base path resolution and nested context support for run_test! ([6d0ad17](https://github.com/openapi-ruby/openapi-ruby/commit/6d0ad17aad13a6a7f77f76cc39d1a8a19dce388e))
+* rake task for schema generation via rspec --dry-run ([bd89b10](https://github.com/openapi-ruby/openapi-ruby/commit/bd89b10ce1e2f5d88627eb9812e53a30eee08499))
+* resolve base path from schema server URL in RSpec adapter ([ba818af](https://github.com/openapi-ruby/openapi-ruby/commit/ba818af45ff49c61224bd7bb3aa81966f7d183d4))
+* update minitest adapter with feature parity to RSpec adapter ([fccc0d2](https://github.com/openapi-ruby/openapi-ruby/commit/fccc0d26608fe6cd51e6bc60a9c104b5bca44cb6))
+
+
+### Bug Fixes
+
+* security scheme resolution, falsy params, and query params with body ([813ba2b](https://github.com/openapi-ruby/openapi-ruby/commit/813ba2b8c5dc0b50c43616f52d3bbbf8e0b7f33c))
+
 ## [2.3.1](https://github.com/openapi-ruby/openapi-ruby/compare/v2.3.0...v2.3.1) (2026-04-16)
 
 
