@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0](https://github.com/openapi-ruby/openapi-ruby/compare/v2.1.0...v2.2.0) (2026-04-16)
+
+
+### Features
+
+* improve component loading, schema inheritance, and Swagger UI ([9de585d](https://github.com/openapi-ruby/openapi-ruby/commit/9de585d607d956b384e1100b459864852b3b8602))
+
+
+### Bug Fixes
+
+* add duplicate component detection to registry ([cb7f99a](https://github.com/openapi-ruby/openapi-ruby/commit/cb7f99a7860efccd98ca4d810141cd903581c279))
+
 ## [2.1.0](https://github.com/openapi-ruby/openapi-ruby/compare/v2.0.0...v2.1.0) (2026-04-16)
 
 
