@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/mortik/openapi-ruby/compare/openapi-ruby/v1.0.0...openapi-ruby/v1.0.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* pin rubygems/configure-rubygems-credentials to v1.0.0 ([9dd7b08](https://github.com/mortik/openapi-ruby/commit/9dd7b08d577f02012fa4c9aecd7391c65ed778cc))
+
 ## [1.0.0](https://github.com/mortik/openapi-ruby/compare/openapi-ruby-v0.1.0...openapi-ruby/v1.0.0) (2026-04-16)
 
 
