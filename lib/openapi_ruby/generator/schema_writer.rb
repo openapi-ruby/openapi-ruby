@@ -23,6 +23,7 @@ module OpenapiRuby
 
       def write!
         document = build_document
+        validate_document!(document) if OpenapiRuby.configuration.strict_reference_validation
         output_path = File.join(output_dir, filename)
         FileUtils.mkdir_p(output_dir)
         File.write(output_path, format_output(document))
@@ -54,6 +55,14 @@ module OpenapiRuby
       def filename
         ext = (OpenapiRuby.configuration.schema_output_format == :json) ? "json" : "yaml"
         "#{@schema_name}.#{ext}"
+      end
+
+      def validate_document!(document)
+        errors = document.validate
+        return if errors.empty?
+
+        error_messages = errors.first(10).map { |e| e["error"] || e.to_s }
+        warn "[openapi_ruby] Generated schema '#{@schema_name}' has validation errors:\n#{error_messages.join("\n")}"
       end
 
       def format_output(document)

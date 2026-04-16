@@ -179,4 +179,77 @@ RSpec.describe OpenapiRuby::Middleware::RequestValidation do
       expect(last_response.status).to eq(200)
     end
   end
+
+  describe "prefix filtering" do
+    let(:app) do
+      described_class.new(inner_app, schema_resolver: resolver, mode: :enabled, prefix: "/api/v1")
+    end
+
+    let(:document) do
+      {
+        "openapi" => "3.1.0",
+        "info" => {"title" => "Test", "version" => "1.0"},
+        "paths" => {
+          "/users" => {
+            "get" => {
+              "parameters" => [
+                {"name" => "page", "in" => "query", "required" => true, "schema" => {"type" => "integer"}}
+              ],
+              "responses" => {"200" => {"description" => "OK"}}
+            }
+          }
+        }
+      }
+    end
+
+    it "skips validation for requests not matching prefix" do
+      get "/other/path"
+      expect(last_response.status).to eq(200)
+    end
+
+    it "validates requests matching prefix with prefix stripped" do
+      get "/api/v1/users?page=1"
+      expect(last_response.status).to eq(200)
+    end
+
+    it "rejects invalid requests matching prefix" do
+      get "/api/v1/users"
+      expect(last_response.status).to eq(400)
+    end
+  end
+
+  describe "form data parsing" do
+    let(:document) do
+      {
+        "openapi" => "3.1.0",
+        "info" => {"title" => "Test", "version" => "1.0"},
+        "paths" => {
+          "/upload" => {
+            "post" => {
+              "requestBody" => {
+                "required" => true,
+                "content" => {
+                  "application/x-www-form-urlencoded" => {
+                    "schema" => {
+                      "type" => "object",
+                      "required" => ["name"],
+                      "properties" => {
+                        "name" => {"type" => "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses" => {"200" => {"description" => "OK"}}
+            }
+          }
+        }
+      }
+    end
+
+    it "parses url-encoded form data" do
+      post "/upload", "name=Jane", {"CONTENT_TYPE" => "application/x-www-form-urlencoded"}
+      expect(last_response.status).to eq(200)
+    end
+  end
 end

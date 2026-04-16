@@ -8,21 +8,29 @@ module OpenapiRuby
       config = OpenapiRuby.configuration
 
       if config.request_validation != :disabled || config.response_validation != :disabled
-        schema_path = default_schema_path(config)
+        config.schemas.each do |name, schema_config|
+          schema_path = resolve_schema_path(config, name)
+          next unless schema_path && File.exist?(schema_path)
 
-        if schema_path && File.exist?(schema_path)
-          resolver = Middleware::SchemaResolver.new(spec_path: schema_path)
+          resolver = Middleware::SchemaResolver.new(
+            spec_path: schema_path,
+            strict_reference_validation: config.strict_reference_validation
+          )
+
+          prefix = schema_config[:prefix]
 
           if config.request_validation != :disabled
             app.middleware.use Middleware::RequestValidation,
               schema_resolver: resolver,
-              mode: config.request_validation
+              mode: config.request_validation,
+              prefix: prefix
           end
 
           if config.response_validation != :disabled
             app.middleware.use Middleware::ResponseValidation,
               schema_resolver: resolver,
-              mode: config.response_validation
+              mode: config.response_validation,
+              prefix: prefix
           end
         end
       end
@@ -46,10 +54,7 @@ module OpenapiRuby
 
     private
 
-    def default_schema_path(config)
-      return nil if config.schemas.empty?
-
-      schema_name = config.schemas.keys.first
+    def resolve_schema_path(config, schema_name)
       ext = (config.schema_output_format == :json) ? "json" : "yaml"
       Rails.root.join(config.schema_output_dir, "#{schema_name}.#{ext}").to_s
     end

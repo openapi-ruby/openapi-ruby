@@ -32,6 +32,24 @@ RSpec.describe OpenapiRuby::Core::Document do
 
       expect(doc.to_h).not_to have_key("servers")
     end
+
+    it "accepts a custom OpenAPI version >= 3.1" do
+      doc = described_class.new(openapi_version: "3.1.1")
+
+      expect(doc.to_h["openapi"]).to eq("3.1.1")
+    end
+
+    it "rejects OpenAPI versions below 3.1" do
+      expect {
+        described_class.new(openapi_version: "3.0.3")
+      }.to raise_error(OpenapiRuby::ConfigurationError, /must be >= 3.1.0/)
+    end
+
+    it "defaults to 3.1.0" do
+      doc = described_class.new
+
+      expect(doc.to_h["openapi"]).to eq("3.1.0")
+    end
   end
 
   describe "#add_path" do
@@ -87,6 +105,31 @@ RSpec.describe OpenapiRuby::Core::Document do
       parsed = YAML.safe_load(doc.to_yaml)
 
       expect(parsed["openapi"]).to eq("3.1.0")
+    end
+  end
+
+  describe "#to_h sorting" do
+    it "sorts paths alphabetically" do
+      doc = described_class.new(info: {title: "Test", version: "1.0"})
+      doc.add_path("/users", {"get" => {"responses" => {"200" => {"description" => "OK"}}}})
+      doc.add_path("/accounts", {"get" => {"responses" => {"200" => {"description" => "OK"}}}})
+      doc.add_path("/posts", {"get" => {"responses" => {"200" => {"description" => "OK"}}}})
+
+      expect(doc.to_h["paths"].keys).to eq(["/accounts", "/posts", "/users"])
+    end
+
+    it "sorts component schemas alphabetically" do
+      doc = described_class.new(info: {title: "Test", version: "1.0"})
+      doc.set_components({"schemas" => {"User" => {"type" => "object"}, "Account" => {"type" => "object"}, "Post" => {"type" => "object"}}})
+
+      expect(doc.to_h["components"]["schemas"].keys).to eq(["Account", "Post", "User"])
+    end
+
+    it "sorts tags alphabetically" do
+      doc = described_class.new(info: {title: "Test", version: "1.0"})
+      doc.set_tags([{"name" => "Users"}, {"name" => "Accounts"}, {"name" => "Posts"}])
+
+      expect(doc.to_h["tags"].map { |t| t["name"] }).to eq(["Accounts", "Posts", "Users"])
     end
   end
 

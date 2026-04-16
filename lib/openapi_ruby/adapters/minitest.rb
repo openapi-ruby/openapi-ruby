@@ -43,9 +43,16 @@ module OpenapiRuby
           request_params = body || params.reject { |k, _| path_param_names(context).include?(k.to_s) }
           request_headers = headers.dup
 
-          if body.is_a?(Hash)
-            request_params = body.to_json
-            request_headers["Content-Type"] ||= "application/json"
+          if body
+            content_type = request_headers["Content-Type"] || context.operations[method.to_s]&.instance_variable_get(:@consumes_list)&.first
+
+            if content_type&.include?("form-data") || content_type&.include?("x-www-form-urlencoded")
+              request_params = body
+              request_headers["Content-Type"] ||= content_type
+            else
+              request_params = body.is_a?(String) ? body : body.to_json
+              request_headers["Content-Type"] ||= content_type || "application/json"
+            end
           end
 
           send_args = {params: request_params}

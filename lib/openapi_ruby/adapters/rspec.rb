@@ -170,9 +170,16 @@ module OpenapiRuby
             send_args = {params: body || params}
             send_args[:headers] = headers if headers.any?
 
-            if (body && headers["Content-Type"]&.include?("json")) || body.is_a?(Hash)
-              send_args[:params] = body.is_a?(String) ? body : body.to_json
-              send_args[:headers] = (headers || {}).merge("Content-Type" => "application/json")
+            if body
+              content_type = headers["Content-Type"] || operation&.instance_variable_get(:@consumes_list)&.first
+
+              if content_type&.include?("form-data") || content_type&.include?("x-www-form-urlencoded")
+                send_args[:params] = body
+                send_args[:headers] = (headers || {}).merge("Content-Type" => content_type)
+              else
+                send_args[:params] = body.is_a?(String) ? body : body.to_json
+                send_args[:headers] = (headers || {}).merge("Content-Type" => content_type || "application/json")
+              end
             end
 
             send(method.to_sym, path, **send_args)

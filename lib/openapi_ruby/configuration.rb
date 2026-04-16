@@ -8,8 +8,10 @@ module OpenapiRuby
 
     # Components
     attr_accessor :component_paths
+    attr_accessor :component_scope_paths
     attr_accessor :camelize_keys, :key_transform, :response_validation, :strict_query_params,
       :coerce_params, :error_handler, :schema_output_format, :validate_responses_in_tests, :ui_path, :ui_config, :coverage_report_path
+    attr_accessor :strict_reference_validation
 
     # Middleware (runtime validation)
     attr_accessor :request_validation
@@ -26,6 +28,7 @@ module OpenapiRuby
     def initialize
       @schemas = {}
       @component_paths = ["app/api_components"]
+      @component_scope_paths = {}
       @camelize_keys = true
       @key_transform = nil
       @request_validation = :disabled
@@ -39,6 +42,7 @@ module OpenapiRuby
       @ui_enabled = false
       @ui_path = "/api-docs"
       @ui_config = {}
+      @strict_reference_validation = true
       @coverage_enabled = false
       @coverage_report_path = "tmp/openapi_coverage.json"
     end

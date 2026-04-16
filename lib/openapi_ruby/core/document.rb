@@ -3,13 +3,15 @@
 module OpenapiRuby
   module Core
     class Document
-      OPENAPI_VERSION = "3.1.0"
+      MIN_OPENAPI_VERSION = "3.1.0"
+      DEFAULT_OPENAPI_VERSION = "3.1.0"
 
       attr_reader :data
 
-      def initialize(info: {}, servers: [])
+      def initialize(info: {}, servers: [], openapi_version: DEFAULT_OPENAPI_VERSION)
+        validate_version!(openapi_version)
         @data = {
-          "openapi" => OPENAPI_VERSION,
+          "openapi" => openapi_version,
           "info" => normalize_info(info),
           "paths" => {}
         }
@@ -34,7 +36,13 @@ module OpenapiRuby
       end
 
       def to_h
-        @data
+        result = @data.dup
+        result["paths"] = result["paths"].sort.to_h if result["paths"]
+        if result["components"]
+          result["components"] = result["components"].transform_values { |v| v.sort.to_h }
+        end
+        result["tags"] = result["tags"].sort_by { |t| t["name"].to_s } if result["tags"]
+        result
       end
 
       def to_json(*_args)
@@ -58,6 +66,13 @@ module OpenapiRuby
       end
 
       private
+
+      def validate_version!(version)
+        if Gem::Version.new(version) < Gem::Version.new(MIN_OPENAPI_VERSION)
+          raise OpenapiRuby::ConfigurationError,
+            "OpenAPI version must be >= #{MIN_OPENAPI_VERSION}, got #{version}"
+        end
+      end
 
       def normalize_info(info)
         result = info.transform_keys(&:to_s)

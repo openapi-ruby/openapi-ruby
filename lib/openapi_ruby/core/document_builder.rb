@@ -7,7 +7,8 @@ module OpenapiRuby
         @spec_config = spec_config
         @document = Document.new(
           info: spec_config[:info] || {},
-          servers: spec_config[:servers] || []
+          servers: spec_config[:servers] || [],
+          openapi_version: spec_config[:openapi_version] || Document::DEFAULT_OPENAPI_VERSION
         )
         @paths = {}
         @components = {}

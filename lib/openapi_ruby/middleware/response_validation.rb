@@ -9,10 +9,18 @@ module OpenapiRuby
         @error_handler = options[:error_handler] || ErrorHandler.new
         @mode = options.fetch(:mode, OpenapiRuby.configuration.response_validation)
         @validate_success_only = options.fetch(:validate_success_only, true)
+        @prefix = options[:prefix]
       end
 
       def call(env)
         return @app.call(env) if @mode == :disabled
+
+        request = Rack::Request.new(env)
+
+        # Skip if request doesn't match prefix
+        if @prefix && !request.path_info.start_with?(@prefix)
+          return @app.call(env)
+        end
 
         status, headers, body = @app.call(env)
 

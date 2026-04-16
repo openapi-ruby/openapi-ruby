@@ -3,15 +3,16 @@
 module OpenapiRuby
   module Middleware
     class SchemaResolver
-      def initialize(spec_path: nil, document: nil)
+      def initialize(spec_path: nil, document: nil, strict_reference_validation: true)
         @spec_path = spec_path
         @document = document
+        @strict_reference_validation = strict_reference_validation
         @path_matcher = nil
         @schemer = nil
       end
 
       def document
-        @document ||= load_document
+        @document ||= load_document.tap { |doc| validate_document!(doc) }
       end
 
       def schemer
@@ -38,6 +39,18 @@ module OpenapiRuby
       end
 
       private
+
+      def validate_document!(doc)
+        return unless @strict_reference_validation
+
+        schemer = JSONSchemer.openapi(doc)
+        errors = schemer.validate.to_a
+        return if errors.empty?
+
+        error_messages = errors.first(5).map { |e| e["error"] || e.to_s }
+        raise OpenapiRuby::ConfigurationError,
+          "OpenAPI document validation failed:\n#{error_messages.join("\n")}"
+      end
 
       def load_document
         raise ConfigurationError, "No spec_path configured for middleware" unless @spec_path

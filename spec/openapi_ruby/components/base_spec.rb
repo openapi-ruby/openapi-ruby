@@ -171,4 +171,34 @@ RSpec.describe OpenapiRuby::Components::Base do
       expect(comp._component_scopes).to eq(%i[public admin])
     end
   end
+
+  describe ".shared_component" do
+    it "marks a component as shared (empty scopes)" do
+      comp = create_component("SharedSchema") do
+        shared_component
+        schema(type: :object)
+      end
+
+      expect(comp._component_scopes).to eq([])
+    end
+  end
+
+  describe ".registry_key" do
+    it "returns component_name when no scopes" do
+      comp = create_component("Schemas::UnscoppedComp") do
+        schema(type: :object)
+      end
+
+      expect(comp.registry_key).to eq("UnscoppedComp")
+    end
+
+    it "includes scopes when present" do
+      comp = create_component("Schemas::ScopedComp") do
+        component_scopes :admin
+        schema(type: :object)
+      end
+
+      expect(comp.registry_key).to eq("admin:ScopedComp")
+    end
+  end
 end

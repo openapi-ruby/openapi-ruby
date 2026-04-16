@@ -73,7 +73,7 @@ RSpec.describe OpenapiRuby::Components::Registry do
   end
 
   describe "duplicate detection" do
-    it "raises on duplicate names in the same type" do
+    it "raises on duplicate names in the same type with same scopes" do
       create_component("DupComp")
 
       expect do
@@ -81,6 +81,17 @@ RSpec.describe OpenapiRuby::Components::Registry do
         stub_const("Other::DupComp", klass)
         klass.include OpenapiRuby::Components::Base
       end.to raise_error(OpenapiRuby::DuplicateComponentError, /DupComp/)
+    end
+
+    it "allows same component name with different scopes" do
+      create_component("ScopedModel", scopes: [:v1])
+      create_component("Admin::ScopedModel", scopes: [:admin])
+
+      v1_result = registry.to_openapi_hash(scope: :v1)
+      admin_result = registry.to_openapi_hash(scope: :admin)
+
+      expect(v1_result["schemas"]).to have_key("ScopedModel")
+      expect(admin_result["schemas"]).to have_key("ScopedModel")
     end
   end
 end

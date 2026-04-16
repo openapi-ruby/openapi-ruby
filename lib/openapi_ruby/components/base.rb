@@ -10,6 +10,7 @@ module OpenapiRuby
         base.class_attribute :_skip_key_transformation, default: false
         base.class_attribute :_component_type, default: :schemas
         base.class_attribute :_component_scopes, default: []
+        base.class_attribute :_component_scopes_explicitly_set, default: false
 
         Registry.instance.register(base) if base.name
       end
@@ -22,6 +23,7 @@ module OpenapiRuby
           subclass._skip_key_transformation = _skip_key_transformation
           subclass._component_type = _component_type
           subclass._component_scopes = _component_scopes.dup
+          subclass._component_scopes_explicitly_set = _component_scopes_explicitly_set
           Registry.instance.register(subclass) if subclass.name
         end
 
@@ -45,11 +47,27 @@ module OpenapiRuby
         end
 
         def component_scopes(*scopes)
+          Registry.instance.unregister(self)
           self._component_scopes = scopes.flatten.map(&:to_sym)
+          self._component_scopes_explicitly_set = true
+          Registry.instance.register(self)
+        end
+
+        def shared_component
+          self._component_scopes = []
+          self._component_scopes_explicitly_set = true
         end
 
         def component_name
           (name || "Anonymous").demodulize
+        end
+
+        def registry_key
+          if _component_scopes.empty?
+            component_name
+          else
+            "#{_component_scopes.sort.join("_")}:#{component_name}"
+          end
         end
 
         def to_openapi

@@ -62,9 +62,17 @@ module OpenapiRuby
       def build_body
         return nil unless @body_value
 
-        if @body_value.is_a?(Hash) || @body_value.is_a?(Array)
+        content_type = @headers&.fetch("Content-Type", nil)
+        consumes = @operation.instance_variable_get(:@consumes_list)
+        content_type ||= consumes&.first
+
+        if content_type&.include?("form-data") || content_type&.include?("x-www-form-urlencoded")
+          @body_value
+        elsif @body_value.is_a?(Hash) || @body_value.is_a?(Array)
+          @body_value.to_json
+        else
+          @body_value
         end
-        @body_value
       end
 
       def deep_stringify(value)

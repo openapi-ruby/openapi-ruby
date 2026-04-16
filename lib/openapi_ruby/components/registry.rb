@@ -13,21 +13,21 @@ module OpenapiRuby
 
       def register(component_class)
         type = component_class._component_type
-        name = component_class.component_name
+        key = component_class.registry_key
 
         @components[type] ||= {}
 
-        if @components[type].key?(name) && @components[type][name] != component_class
-          raise DuplicateComponentError, "Component '#{name}' already registered under #{type}"
+        if @components[type].key?(key) && @components[type][key] != component_class
+          raise DuplicateComponentError, "Component '#{component_class.component_name}' already registered under #{type}"
         end
 
-        @components[type][name] = component_class
+        @components[type][key] = component_class
       end
 
       def unregister(component_class)
         type = component_class._component_type
-        name = component_class.component_name
-        @components[type]&.delete(name)
+        key = component_class.registry_key
+        @components[type]&.delete(key)
       end
 
       def components_for(type)
@@ -36,6 +36,10 @@ module OpenapiRuby
 
       def all_types
         @components.keys
+      end
+
+      def all_registered_classes
+        @components.values.flat_map(&:values)
       end
 
       def grouped_by_type

@@ -10,13 +10,22 @@ module OpenapiRuby
         @coerce = options.fetch(:coerce, OpenapiRuby.configuration.coerce_params)
         @error_handler = options[:error_handler] || ErrorHandler.new
         @mode = options.fetch(:mode, OpenapiRuby.configuration.request_validation)
+        @prefix = options[:prefix]
       end
 
       def call(env)
         return @app.call(env) if @mode == :disabled
 
         request = Rack::Request.new(env)
-        result = @resolver.find_operation(request.request_method, request.path_info)
+
+        # Skip if request doesn't match prefix
+        if @prefix && !request.path_info.start_with?(@prefix)
+          return @app.call(env)
+        end
+
+        # Strip prefix for path matching
+        match_path = @prefix ? request.path_info.sub(@prefix, "") : request.path_info
+        result = @resolver.find_operation(request.request_method, match_path)
 
         if result.nil?
           return strict? ? @error_handler.not_found(request.path_info) : @app.call(env)
@@ -194,6 +203,11 @@ module OpenapiRuby
 
         if media_type&.include?("json")
           JSON.parse(content)
+        elsif media_type&.include?("x-www-form-urlencoded")
+          Rack::Utils.parse_nested_query(content)
+        elsif media_type&.include?("form-data")
+          # Multipart form data is already parsed by Rack into params
+          nil
         else
           content
         end
