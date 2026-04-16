@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "openapi_ruby"
+require "uri"
 
 module OpenapiRuby
   module Adapters
@@ -225,8 +226,12 @@ module OpenapiRuby
           template = path_ctx&.path_template || ""
           find_operation(metadata)
 
+          # Prepend base path from schema server URL
+          base_path = resolve_base_path(path_ctx&.schema_name)
+          full_path = "#{base_path}#{template}"
+
           # Substitute {param} placeholders with let values
-          template.gsub(/\{(\w+)\}/) do
+          full_path.gsub(/\{(\w+)\}/) do
             name = ::Regexp.last_match(1)
             val = resolve_let(name.to_sym)
             val || "{#{name}}"
@@ -251,6 +256,22 @@ module OpenapiRuby
             meta = meta[:parent_example_group]
           end
           nil
+        end
+
+        def resolve_base_path(schema_name)
+          return "" unless schema_name
+
+          config = OpenapiRuby.configuration
+          schema_config = config.schemas[schema_name.to_sym] || config.schemas[schema_name.to_s]
+          return "" unless schema_config
+
+          # Extract path from the first server URL
+          server_url = schema_config.dig(:servers, 0, :url) || schema_config.dig("servers", 0, "url")
+          return "" unless server_url
+
+          URI.parse(server_url).path.chomp("/")
+        rescue URI::InvalidURIError
+          ""
         end
 
         def resolve_let(name)
