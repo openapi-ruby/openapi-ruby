@@ -8,12 +8,17 @@ module OpenapiRuby
       return head :not_found unless OpenapiRuby.configuration.ui_enabled
 
       config = OpenapiRuby.configuration
-      @schemas = config.schemas.keys.map(&:to_s)
-      @default_schema = @schemas.first
+      @schemas = config.schemas
       @ui_config = config.ui_config
-      @schema_url = openapi_ruby.schema_path(@default_schema, format: schema_format)
 
       render html: swagger_ui_html.html_safe
+    end
+
+    def oauth2_redirect
+      return head :not_found unless OpenapiRuby.configuration.ui_enabled
+
+      file = File.join(OpenapiRuby::Engine.root, "app", "views", "openapi_ruby", "oauth2_redirect.html")
+      render file: file, layout: false, content_type: "text/html"
     end
 
     private
@@ -41,20 +46,36 @@ module OpenapiRuby
           <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
           <script>
             SwaggerUIBundle({
-              url: "#{@schema_url}",
+              #{schema_urls_js},
               dom_id: '#swagger-ui',
               deepLinking: true,
               presets: [
                 SwaggerUIBundle.presets.apis,
                 SwaggerUIBundle.SwaggerUIStandalonePreset
               ],
-              layout: "BaseLayout",
+              layout: "#{@schemas.size > 1 ? "StandaloneLayout" : "BaseLayout"}",
               #{ui_config_js}
             });
           </script>
         </body>
         </html>
       HTML
+    end
+
+    def schema_urls_js
+      fmt = schema_format
+      if @schemas.size > 1
+        urls = @schemas.map { |name, schema_config|
+          title = schema_config.dig(:info, :title) || name.to_s
+          url = openapi_ruby.schema_path(name.to_s, format: fmt)
+          {url: url, name: title}
+        }
+        "urls: #{urls.to_json}"
+      else
+        name = @schemas.keys.first.to_s
+        url = openapi_ruby.schema_path(name, format: fmt)
+        "url: \"#{url}\""
+      end
     end
 
     def ui_config_js
