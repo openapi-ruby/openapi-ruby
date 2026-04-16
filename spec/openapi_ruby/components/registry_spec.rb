@@ -74,12 +74,13 @@ RSpec.describe OpenapiRuby::Components::Registry do
 
   describe "duplicate detection" do
     it "raises on duplicate names in the same type with same scopes" do
-      create_component("DupComp")
+      create_component("DupComp", scopes: [:v1])
 
       expect do
         klass = Class.new
         stub_const("Other::DupComp", klass)
         klass.include OpenapiRuby::Components::Base
+        klass.component_scopes(:v1)
       end.to raise_error(OpenapiRuby::DuplicateComponentError, /DupComp/)
     end
 
