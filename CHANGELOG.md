@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.5.0](https://github.com/openapi-ruby/openapi-ruby/compare/v2.4.0...v2.5.0) (2026-04-17)
+
+
+### Features
+
+* support both RSpec and Minitest in rake task ([4cbd0ac](https://github.com/openapi-ruby/openapi-ruby/commit/4cbd0ac836b2929664970fc326bbbc3876405713))
+
+
+### Bug Fixes
+
+* component scoping with Rails autoloading and unscoped components ([25efff6](https://github.com/openapi-ruby/openapi-ruby/commit/25efff67c637a034fa2cf05d734d28d79cfdbcd8))
+* resolve Accept header from let variable, support custom Accept ([80de102](https://github.com/openapi-ruby/openapi-ruby/commit/80de102be010974f44bc86384f7ef98bf2671f41))
+* schema generation with RSpec --dry-run mode ([6aa1d66](https://github.com/openapi-ruby/openapi-ruby/commit/6aa1d66cab5bff2937f4b1f8478ce5fa5b37fbfb))
+
 ## [2.4.0](https://github.com/openapi-ruby/openapi-ruby/compare/v2.3.1...v2.4.0) (2026-04-16)
 
 
