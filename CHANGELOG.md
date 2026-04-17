@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.2](https://github.com/openapi-ruby/openapi-ruby/compare/v2.5.1...v2.5.2) (2026-04-17)
+
+
+### Bug Fixes
+
+* keep first visible response when duplicate status codes exist ([f434914](https://github.com/openapi-ruby/openapi-ruby/commit/f434914e9d073cbfe7ddfd5674cc0043294b7429))
+
 ## [2.5.1](https://github.com/openapi-ruby/openapi-ruby/compare/v2.5.0...v2.5.1) (2026-04-17)
 
 
