@@ -94,7 +94,18 @@ module OpenapiRuby
           result[type_key] = {}
           components.each_value do |klass|
             next if klass._schema_hidden
-            next if scope && !klass._component_scopes.empty? && !klass._component_scopes.include?(scope)
+            # When filtering by scope:
+            # - Components with matching scope: included
+            # - Components explicitly marked as shared (empty scopes + explicitly_set): included
+            # - Components with non-matching scope: excluded
+            # - Components with no scope assigned (empty scopes + NOT explicitly_set): excluded
+            if scope
+              if klass._component_scopes.empty?
+                next unless klass._component_scopes_explicitly_set
+              else
+                next unless klass._component_scopes.include?(scope)
+              end
+            end
 
             result[type_key][klass.component_name] = klass.to_openapi
           end

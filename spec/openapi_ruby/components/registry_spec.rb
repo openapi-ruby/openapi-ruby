@@ -62,13 +62,32 @@ RSpec.describe OpenapiRuby::Components::Registry do
     it "filters by scope" do
       create_component("PublicComp", scopes: [:public])
       create_component("AdminComp", scopes: [:admin])
-      create_component("SharedComp", scopes: [])
 
       result = registry.to_openapi_hash(scope: :public)
 
       expect(result["schemas"]).to have_key("PublicComp")
       expect(result["schemas"]).not_to have_key("AdminComp")
+    end
+
+    it "includes explicitly shared components in all scopes" do
+      create_component("PublicComp", scopes: [:public])
+      shared = create_component("SharedComp")
+      shared.shared_component
+
+      result = registry.to_openapi_hash(scope: :public)
+
+      expect(result["schemas"]).to have_key("PublicComp")
       expect(result["schemas"]).to have_key("SharedComp")
+    end
+
+    it "excludes unscoped components (not explicitly shared) when filtering by scope" do
+      create_component("PublicComp", scopes: [:public])
+      create_component("UnscopedComp") # no scopes, not explicitly shared
+
+      result = registry.to_openapi_hash(scope: :public)
+
+      expect(result["schemas"]).to have_key("PublicComp")
+      expect(result["schemas"]).not_to have_key("UnscopedComp")
     end
   end
 

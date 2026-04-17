@@ -110,26 +110,61 @@ module OpenapiRuby
       end
 
       def load_with_scope_inference(all_files, scope_paths)
+        # Build a map of file path → inferred scope before loading.
+        file_scope_map = {}
         all_files.each do |entry|
-          inferred_scope = infer_scope(entry[:relative], scope_paths)
+          scope = infer_scope(entry[:relative], scope_paths)
+          file_scope_map[entry[:file]] = scope if scope
+        end
 
+        # Load files, tracking which classes each file registers.
+        # We track both newly loaded AND already-loaded classes via before/after diffs.
+        class_to_file = {}
+        all_files.each do |entry|
           registered_before = Registry.instance.all_registered_classes.dup
           require entry[:file]
-          registered_after = Registry.instance.all_registered_classes
+          new_classes = Registry.instance.all_registered_classes - registered_before
+          new_classes.each { |klass| class_to_file[klass] = entry[:file] }
+        end
 
-          new_classes = registered_after - registered_before
-          new_classes.each do |klass|
-            next if klass._component_scopes_explicitly_set
+        # For components that were already autoloaded by Rails (require returned false,
+        # so they didn't appear in the before/after diff), try to match them to files
+        # by their class name → file path convention.
+        Registry.instance.all_registered_classes.each do |klass|
+          next if class_to_file.key?(klass)
 
-            if inferred_scope == :shared
-              klass._component_scopes = []
-            elsif inferred_scope
-              Registry.instance.unregister(klass)
-              klass._component_scopes = [inferred_scope]
-              Registry.instance.register(klass)
-            end
+          source_file = find_source_file_for(klass)
+          class_to_file[klass] = source_file if source_file
+        end
+
+        # Assign scopes to all registered components based on their source file.
+        class_to_file.each do |klass, file|
+          next if klass._component_scopes_explicitly_set
+
+          inferred_scope = file_scope_map[file]
+          next unless inferred_scope
+
+          if inferred_scope == :shared
+            klass._component_scopes = []
+          else
+            Registry.instance.unregister(klass)
+            klass._component_scopes = [inferred_scope]
+            Registry.instance.register(klass)
           end
         end
+      end
+
+      def find_source_file_for(klass)
+        return nil unless klass.name
+
+        # Try the conventional path based on the class name (e.g., Internal::V1::Schemas::User → internal/v1/schemas/user.rb)
+        relative = klass.name.underscore + ".rb"
+        @paths.each do |base_path|
+          expanded = File.expand_path(base_path)
+          candidate = File.join(expanded, relative)
+          return candidate if File.exist?(candidate)
+        end
+        nil
       end
 
       def infer_scope(relative_path, scope_paths)
