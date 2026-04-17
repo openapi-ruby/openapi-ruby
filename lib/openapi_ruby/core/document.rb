@@ -28,7 +28,7 @@ module OpenapiRuby
       end
 
       def set_security(security)
-        @data["security"] = security if security.any?
+        @data["security"] = security
       end
 
       def set_tags(tags)
