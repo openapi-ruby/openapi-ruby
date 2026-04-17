@@ -140,8 +140,9 @@ module OpenapiRuby
           end
 
           method = operation&.verb || "get"
-          # Default to JSON Accept header for API requests
-          headers["Accept"] ||= "application/json"
+          # Accept header: use let(:Accept) if defined, otherwise default to JSON
+          accept = resolve_let(:Accept)
+          headers["Accept"] = accept || "application/json"
 
           if body
             content_type = operation&.request_body_definition&.dig("content")&.keys&.first || "application/json"
