@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/openapi-ruby/openapi-ruby/compare/v3.0.1...v3.0.2) (2026-04-20)
+
+
+### Bug Fixes
+
+* default to RAILS_ENV=test by spawning subprocess for generation ([b1a7a8c](https://github.com/openapi-ruby/openapi-ruby/commit/b1a7a8c7bd92d967d01e1e141add09a2932dc90e))
+
 ## [3.0.1](https://github.com/openapi-ruby/openapi-ruby/compare/v3.0.0...v3.0.1) (2026-04-20)
 
 
