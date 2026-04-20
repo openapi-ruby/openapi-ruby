@@ -2,17 +2,18 @@
 
 namespace :openapi_ruby do
   desc "Generate OpenAPI schema files from spec definitions and components"
-  task generate: :environment do
+  task :generate do
     framework = ENV.fetch("FRAMEWORK", detect_test_framework).to_s
+    pattern = ENV.fetch("PATTERN", default_pattern_for(framework))
 
-    case framework
-    when "rspec"
-      generate_with_rspec
-    when "minitest"
-      generate_with_minitest
-    else
-      abort "Unknown test framework '#{framework}'. Set FRAMEWORK=rspec or FRAMEWORK=minitest."
-    end
+    # Spawn a subprocess so RAILS_ENV defaults to "test" cleanly,
+    # just like rswag did with RSpec::Core::RakeTask.
+    env = {"RAILS_ENV" => ENV.fetch("RAILS_ENV", "test")}
+    script = generate_script(framework, pattern)
+    command = "bundle exec ruby -e #{Shellwords.escape(script)}"
+
+    puts "Generating OpenAPI schemas (#{framework})..."
+    system(env, command) || abort("Schema generation failed")
   end
 end
 
@@ -26,43 +27,29 @@ def detect_test_framework
   end
 end
 
-def generate_with_rspec
-  pattern = ENV.fetch("PATTERN", "spec/**/*_spec.rb")
-  puts "Generating OpenAPI schemas (RSpec)..."
-
-  # Load rspec-core first — normally RSpec's runner does this before spec_helper,
-  # but since we're loading specs via require we need it explicitly.
-  require "rspec/core"
-
-  # Add spec/ to the load path so require "openapi_helper" / "rails_helper" works,
-  # matching what RSpec does when it runs.
-  $LOAD_PATH.unshift(File.expand_path("spec")) unless $LOAD_PATH.include?(File.expand_path("spec"))
-
-  # Load all spec files to trigger DSL context registrations.
-  # RSpec's describe/context blocks are evaluated at load time,
-  # so requiring the files registers paths and operations without
-  # running any tests. Spec files pull in RSpec and the openapi_ruby
-  # adapter via their own require chains (e.g. require "openapi_helper").
-  pattern.split(",").each do |p|
-    Dir.glob(p.strip).sort.each { |f| require File.expand_path(f) }
+def default_pattern_for(framework)
+  case framework
+  when "rspec" then "spec/**/*_spec.rb"
+  when "minitest" then "test/**/*_test.rb"
   end
-
-  # Generate schemas from the registered contexts
-  OpenapiRuby::Generator::SchemaWriter.generate_all!
 end
 
-def generate_with_minitest
-  pattern = ENV.fetch("PATTERN", "test/**/*_test.rb")
-  puts "Generating OpenAPI schemas (Minitest)..."
-
-  # Load Rails environment and minitest adapter
-  require "openapi_ruby/minitest"
-
-  # Load all test files to trigger api_path registrations.
-  # Minitest's api_path registers DSL contexts at class load time,
-  # so simply requiring the files is enough.
-  Dir.glob(pattern).sort.each { |f| require File.expand_path(f) }
-
-  # Generate schemas from the registered contexts
-  OpenapiRuby::Generator::SchemaWriter.generate_all!
+def generate_script(framework, pattern)
+  case framework
+  when "rspec"
+    <<~RUBY
+      require "rspec/core"
+      $LOAD_PATH.unshift(File.expand_path("spec")) unless $LOAD_PATH.include?(File.expand_path("spec"))
+      #{pattern.split(",").map { |p| %[Dir.glob(#{p.strip.inspect}).sort.each { |f| require File.expand_path(f) }] }.join("\n")}
+      OpenapiRuby::Generator::SchemaWriter.generate_all!
+    RUBY
+  when "minitest"
+    <<~RUBY
+      require "openapi_ruby/minitest"
+      #{pattern.split(",").map { |p| %[Dir.glob(#{p.strip.inspect}).sort.each { |f| require File.expand_path(f) }] }.join("\n")}
+      OpenapiRuby::Generator::SchemaWriter.generate_all!
+    RUBY
+  else
+    abort "Unknown test framework '#{framework}'."
+  end
 end
