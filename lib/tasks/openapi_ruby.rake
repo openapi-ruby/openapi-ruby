@@ -28,9 +28,27 @@ end
 
 def generate_with_rspec
   pattern = ENV.fetch("PATTERN", "spec/**/*_spec.rb")
-  command = "bundle exec rspec --pattern '#{pattern}' --dry-run --order defined"
   puts "Generating OpenAPI schemas (RSpec)..."
-  system(command) || abort("Schema generation failed")
+
+  # Load rspec-core first — normally RSpec's runner does this before spec_helper,
+  # but since we're loading specs via require we need it explicitly.
+  require "rspec/core"
+
+  # Add spec/ to the load path so require "openapi_helper" / "rails_helper" works,
+  # matching what RSpec does when it runs.
+  $LOAD_PATH.unshift(File.expand_path("spec")) unless $LOAD_PATH.include?(File.expand_path("spec"))
+
+  # Load all spec files to trigger DSL context registrations.
+  # RSpec's describe/context blocks are evaluated at load time,
+  # so requiring the files registers paths and operations without
+  # running any tests. Spec files pull in RSpec and the openapi_ruby
+  # adapter via their own require chains (e.g. require "openapi_helper").
+  pattern.split(",").each do |p|
+    Dir.glob(p.strip).each { |f| require File.expand_path(f) }
+  end
+
+  # Generate schemas from the registered contexts
+  OpenapiRuby::Generator::SchemaWriter.generate_all!
 end
 
 def generate_with_minitest

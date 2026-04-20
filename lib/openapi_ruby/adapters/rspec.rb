@@ -278,22 +278,10 @@ module OpenapiRuby
             config.include ::RSpec::Rails::RequestExampleGroup, type: :openapi
           end
 
-          config.after(:suite) do
-            OpenapiRuby::Generator::SchemaWriter.generate_all!
-          rescue => e
-            warn "[openapi_ruby] Schema generation failed: #{e.message}"
-          end
-
-          # RSpec's --dry-run mode does not fire after(:suite) hooks.
-          # Describe/context blocks are still evaluated (registering DSL contexts),
-          # but the hook that writes schemas never runs. Use at_exit as a fallback.
-          if config.dry_run?
-            at_exit do
-              OpenapiRuby::Generator::SchemaWriter.generate_all!
-            rescue => e
-              warn "[openapi_ruby] Schema generation failed: #{e.message}"
-            end
-          end
+          # Schema writing is handled by the rake task (openapi_ruby:generate),
+          # not by test runs. The rake task loads spec files to register DSL
+          # contexts, then calls SchemaWriter.generate_all! directly.
+          # This prevents partial schema overwrites when running a subset of specs.
         end
       end
     end

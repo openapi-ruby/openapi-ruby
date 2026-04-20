@@ -191,11 +191,10 @@ module OpenapiRuby
       end
 
       def self.install!
-        ::Minitest.after_run do
-          OpenapiRuby::Generator::SchemaWriter.generate_all!
-        rescue => e
-          warn "[openapi_ruby] Schema generation failed: #{e.message}"
-        end
+        # Schema writing is handled by the rake task (openapi_ruby:generate),
+        # not by test runs. The rake task loads test files to register DSL
+        # contexts, then calls SchemaWriter.generate_all! directly.
+        # This prevents partial schema overwrites when running a subset of tests.
       end
     end
   end
