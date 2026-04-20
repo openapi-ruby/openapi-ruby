@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/openapi-ruby/openapi-ruby/compare/v3.0.0...v3.0.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* deterministic schema output across platforms ([9699948](https://github.com/openapi-ruby/openapi-ruby/commit/9699948fb3fc8d8cf7328491489bef10647a3b5d))
+
 ## [3.0.0](https://github.com/openapi-ruby/openapi-ruby/compare/v2.6.1...v3.0.0) (2026-04-20)
 
 
