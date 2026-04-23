@@ -8,16 +8,12 @@ module OpenapiRuby
       def initialize(paths: nil, scope: nil)
         @paths = paths || OpenapiRuby.configuration.component_paths
         @scope = scope&.to_sym
-        @loaded = false
-        @loading = false
       end
 
       def load!
-        @loading = true
         define_namespace_modules!
         load_component_files!
-        @loaded = true
-        @loading = false
+        @@loaded = true # rubocop:disable Style/ClassVars
         self
       end
 
@@ -204,8 +200,10 @@ module OpenapiRuby
         to_openapi_hash[type.to_s] || {}
       end
 
+      @@loaded = false # rubocop:disable Style/ClassVars
+
       def ensure_loaded!
-        return if @loaded || @loading
+        return if @@loaded
 
         load!
       end
