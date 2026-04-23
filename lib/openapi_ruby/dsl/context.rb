@@ -23,8 +23,6 @@ module OpenapiRuby
       HTTP_METHODS.each do |method|
         define_method(method) do |summary = nil, &block|
           op = OperationContext.new(method, summary)
-          # Copy path-level parameters to operation
-          @path_parameters.each { |p| op.parameter(p) }
           op.instance_eval(&block) if block
           @operations[method.to_s] = op
           op
@@ -34,8 +32,8 @@ module OpenapiRuby
       def to_openapi
         result = {}
 
-        # Path-level parameters are already copied into each operation (line 27),
-        # so we don't output them at the path level to avoid duplicates.
+        result["parameters"] = @path_parameters if @path_parameters.any?
+
         @operations.each do |verb, op|
           result[verb] = op.to_openapi
         end
