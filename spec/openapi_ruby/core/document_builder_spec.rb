@@ -84,10 +84,11 @@ RSpec.describe OpenapiRuby::Core::DocumentBuilder do
       )
     end
 
-    it "adds 400 ref to operations without one" do
+    it "adds 400 ref to operations with parameters" do
       builder = described_class.new(info: {title: "API", version: "1.0"})
       builder.add_path("/users", {
         "get" => {
+          "parameters" => [{"name" => "page", "in" => "query"}],
           "responses" => {"200" => {"description" => "OK"}}
         }
       })
@@ -97,6 +98,19 @@ RSpec.describe OpenapiRuby::Core::DocumentBuilder do
       expect(doc.to_h["paths"]["/users"]["get"]["responses"]["400"]).to eq(
         {"$ref" => "#/components/responses/SchemaValidationError"}
       )
+    end
+
+    it "skips 400 for operations without parameters or request body" do
+      builder = described_class.new(info: {title: "API", version: "1.0"})
+      builder.add_path("/health", {
+        "get" => {
+          "responses" => {"200" => {"description" => "OK"}}
+        }
+      })
+
+      doc = builder.build
+
+      expect(doc.to_h["paths"]["/health"]["get"]["responses"]["400"]).to be_nil
     end
 
     it "does not override existing 400 responses" do

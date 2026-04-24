@@ -60,11 +60,17 @@ module OpenapiRuby
           }
         }
 
-        # Add 400 to every operation that doesn't already define one
+        # Add 400 to operations that have parameters or a request body
         @paths.each_value do |path_item|
+          path_params = path_item["parameters"]
+
           path_item.each do |key, operation|
             next unless operation.is_a?(Hash) && operation.key?("responses")
             next if key == "parameters"
+
+            has_params = operation.key?("parameters") || path_params
+            has_body = operation.key?("requestBody")
+            next unless has_params || has_body
 
             operation["responses"]["400"] ||= {"$ref" => "#/components/responses/SchemaValidationError"}
           end
