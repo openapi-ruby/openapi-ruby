@@ -144,6 +144,13 @@ module OpenapiRuby
           accept = resolve_let(:Accept)
           headers["Accept"] = accept || "application/json"
 
+          # For non-GET methods, Rails sends params as request body, not query string.
+          # Always append query params to the URL so the middleware sees them.
+          if params.any?
+            query_string = params.map { |k, v| "#{k}=#{CGI.escape(v.to_s)}" }.join("&")
+            path = "#{path}?#{query_string}"
+          end
+
           if body
             content_type = operation&.request_body_definition&.dig("content")&.keys&.first || "application/json"
             request_args = if content_type.include?("form-data") || content_type.include?("x-www-form-urlencoded")
@@ -154,13 +161,8 @@ module OpenapiRuby
                 headers: headers.merge("Content-Type" => content_type)
               }
             end
-            # Append query params to path when body is present
-            if params.any?
-              query_string = params.map { |k, v| "#{k}=#{CGI.escape(v.to_s)}" }.join("&")
-              path = "#{path}?#{query_string}"
-            end
           else
-            request_args = {params: params, headers: headers}
+            request_args = {headers: headers}
           end
 
           send(method.to_sym, path, **request_args)

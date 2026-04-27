@@ -49,8 +49,7 @@ RSpec.describe OpenapiRuby::Adapters::RSpec::ExampleHelpers do
       helper.submit_openapi_request(metadata)
 
       expect(helper.last_request).to eq(
-        path: "/items",
-        params: {"page" => 2},
+        path: "/items?page=2",
         headers: {"Accept" => "application/json"}
       )
     end
