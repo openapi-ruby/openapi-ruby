@@ -144,11 +144,10 @@ module OpenapiRuby
           accept = resolve_let(:Accept)
           headers["Accept"] = accept || "application/json"
 
-          # For non-GET methods, Rails sends params as request body, not query string.
-          # Always append query params to the URL so the middleware sees them.
+          # Always append query params to the URL so the middleware sees them
+          # (Rails sends params as request body for non-GET methods).
           if params.any?
-            query_string = params.map { |k, v| "#{k}=#{CGI.escape(v.to_s)}" }.join("&")
-            path = "#{path}?#{query_string}"
+            path = "#{path}?#{Rack::Utils.build_nested_query(params)}"
           end
 
           if body
