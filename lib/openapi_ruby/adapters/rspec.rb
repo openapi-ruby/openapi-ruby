@@ -178,6 +178,19 @@ module OpenapiRuby
               "Expected status #{expected_status}, got #{actual_status}\n" \
               "Response body: #{response.body}"
           end
+
+          if OpenapiRuby.configuration.validate_responses_in_tests && response_ctx.schema_definition
+            schema_name = find_in_metadata(metadata, :openapi_schema_name)
+            validator = Testing::ResponseValidator.new(OpenapiRuby::Adapters::RSpec.validation_document_for(schema_name))
+            errors = validator.validate(
+              response_body: parsed_response_body,
+              status_code: response.status,
+              response_context: response_ctx
+            )
+            unless errors.empty?
+              raise "Response body validation failed:\n#{errors.join("\n")}\nResponse body: #{response.body}"
+            end
+          end
         end
 
         private
@@ -267,6 +280,29 @@ module OpenapiRuby
           JSON.parse(response.body)
         rescue JSON::ParserError
           response.body
+        end
+      end
+
+      # Build the OpenAPI document hash for a given schema name and cache it.
+      # Used by response body validation so $ref schemas can be resolved.
+      def self.validation_document_for(schema_name)
+        return nil unless schema_name
+
+        key = schema_name.to_sym
+        @validation_documents ||= {}
+        @validation_documents[key] ||= begin
+          config = OpenapiRuby.configuration
+          schema_config = config.schemas[key] || config.schemas[schema_name.to_s]
+          return nil unless schema_config
+
+          builder = OpenapiRuby::Core::DocumentBuilder.new(schema_config)
+          OpenapiRuby::DSL::MetadataStore.contexts_for(schema_name).each do |context|
+            builder.add_path(context.path_template, context.to_openapi)
+          end
+          scope = schema_config[:component_scope]
+          loader = OpenapiRuby::Components::Loader.new(scope: scope)
+          builder.merge_components(loader.to_openapi_hash)
+          builder.build.data
         end
       end
 

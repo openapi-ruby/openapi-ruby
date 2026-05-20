@@ -12,3 +12,4 @@ $LOAD_PATH.unshift File.expand_path("../dummy/spec", __dir__)
 
 # Load the dummy app's request specs
 require_relative "../dummy/spec/requests/users_spec"
+require_relative "../dummy/spec/requests/response_validation_spec"
