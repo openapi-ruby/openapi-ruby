@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.2.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.1.1...v3.2.0) (2026-05-21)
+
+
+### Features
+
+* **rspec:** add minitest-style api_path / assert_api_response DSL ([ed106b3](https://github.com/openapi-ruby/openapi-ruby/commit/ed106b30801e1865f23ce6eb699547d69a6d35aa))
+* validate requests against declared operations in test DSL ([2b35c0f](https://github.com/openapi-ruby/openapi-ruby/commit/2b35c0f10f0e1fadf4eff2f461e00f7375dd754f))
+
+
+### Bug Fixes
+
+* clean posts before users in spec teardown to avoid FK constraint ([8f2b425](https://github.com/openapi-ruby/openapi-ruby/commit/8f2b425b03e30d1559e150e3701f213e31717a8d))
+
 ## [3.1.1](https://github.com/openapi-ruby/openapi-ruby/compare/v3.1.0...v3.1.1) (2026-05-21)
 
 
