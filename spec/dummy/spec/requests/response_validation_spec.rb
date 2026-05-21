@@ -2,8 +2,8 @@
 
 require "openapi_helper"
 
-# Verifies that `validate_responses_in_tests` actually validates response
-# bodies in the RSpec adapter (not just the status code). Uses
+# Verifies that the RSpec adapter validates response bodies against the
+# declared `schema(...)` (not just the status code). Uses
 # `openapi_schema_name: :public_api` so the adapter can resolve $ref
 # schemas against the full document.
 RSpec.describe "Response body validation", type: :openapi, openapi_schema_name: :public_api do

@@ -179,7 +179,7 @@ module OpenapiRuby
               "Response body: #{response.body}"
           end
 
-          if OpenapiRuby.configuration.validate_responses_in_tests && response_ctx.schema_definition
+          if response_ctx.schema_definition
             schema_name = find_in_metadata(metadata, :openapi_schema_name)
             validator = Testing::ResponseValidator.new(OpenapiRuby::Adapters::RSpec.validation_document_for(schema_name))
             errors = validator.validate(

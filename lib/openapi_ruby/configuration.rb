@@ -9,46 +9,35 @@ module OpenapiRuby
     # Components
     attr_accessor :component_paths
     attr_accessor :component_scope_paths
-    attr_accessor :camelize_keys, :key_transform, :response_validation, :strict_query_params,
-      :coerce_params, :error_handler, :schema_output_format, :validate_responses_in_tests, :ui_path, :ui_config, :coverage_report_path
+
+    # Output / formatting
+    attr_accessor :camelize_keys, :schema_output_format, :schema_output_dir
     attr_accessor :strict_reference_validation
     attr_accessor :auto_validation_error_response
     attr_accessor :validation_error_schema
 
     # Middleware (runtime validation)
-    attr_accessor :request_validation
-
-    # Test / Generation
-    attr_accessor :schema_output_dir
+    attr_accessor :request_validation, :response_validation, :coerce_params
 
     # UI (optional)
-    attr_accessor :ui_enabled
-
-    # Coverage
-    attr_accessor :coverage_enabled
+    attr_accessor :ui_enabled, :ui_path, :ui_config
 
     def initialize
       @schemas = {}
       @component_paths = ["app/api_components"]
       @component_scope_paths = {}
       @camelize_keys = true
-      @key_transform = nil
       @request_validation = :disabled
       @response_validation = :disabled
-      @strict_query_params = false
       @coerce_params = true
-      @error_handler = nil
       @schema_output_dir = "swagger"
       @schema_output_format = :yaml
-      @validate_responses_in_tests = true
       @ui_enabled = false
       @ui_path = "/api-docs"
       @ui_config = {}
       @strict_reference_validation = true
       @auto_validation_error_response = true
       @validation_error_schema = nil
-      @coverage_enabled = false
-      @coverage_report_path = "tmp/openapi_coverage.json"
     end
 
     def validate!

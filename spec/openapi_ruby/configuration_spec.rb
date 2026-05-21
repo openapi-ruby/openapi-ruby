@@ -38,20 +38,12 @@ RSpec.describe OpenapiRuby::Configuration do
       expect(config.schema_output_format).to eq(:yaml)
     end
 
-    it "enables validate_responses_in_tests" do
-      expect(config.validate_responses_in_tests).to be true
-    end
-
     it "disables ui" do
       expect(config.ui_enabled).to be false
     end
 
     it "sets ui_path" do
       expect(config.ui_path).to eq("/api-docs")
-    end
-
-    it "disables coverage" do
-      expect(config.coverage_enabled).to be false
     end
   end
 

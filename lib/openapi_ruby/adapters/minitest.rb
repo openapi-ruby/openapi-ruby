@@ -87,7 +87,7 @@ module OpenapiRuby
           assert_equal expected_status, response.status,
             "Expected status #{expected_status}, got #{response.status}\nResponse body: #{response.body}"
 
-          if OpenapiRuby.configuration.validate_responses_in_tests && response_ctx.schema_definition
+          if response_ctx.schema_definition
             validator = Testing::ResponseValidator.new
             body_data = parse_response_body
             errors = validator.validate(

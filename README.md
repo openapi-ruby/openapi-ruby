@@ -63,7 +63,6 @@ OpenapiRuby.configure do |config|
   config.camelize_keys = true
   config.schema_output_dir = "swagger"
   config.schema_output_format = :yaml
-  config.validate_responses_in_tests = true
 
   # Runtime middleware (disabled by default)
   config.request_validation = :disabled   # :enabled, :disabled, :warn_only

@@ -20,9 +20,6 @@ OpenapiRuby.configure do |config|
   config.schema_output_dir = "swagger"
   config.schema_output_format = :yaml
 
-  # Validate response bodies in tests against defined schemas
-  config.validate_responses_in_tests = true
-
   # Runtime request/response validation middleware
   # Options: :disabled, :enabled, :warn_only
   config.request_validation = :disabled
