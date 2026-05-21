@@ -45,6 +45,34 @@ RSpec.describe OpenapiRuby::Configuration do
     it "sets ui_path" do
       expect(config.ui_path).to eq("/api-docs")
     end
+
+    it "defaults strict_reference_validation to :warn_only" do
+      expect(config.strict_reference_validation).to eq(:warn_only)
+    end
+  end
+
+  describe "#strict_reference_validation=" do
+    it "accepts :disabled, :enabled, :warn_only" do
+      %i[disabled enabled warn_only].each do |val|
+        config.strict_reference_validation = val
+        expect(config.strict_reference_validation).to eq(val)
+      end
+    end
+
+    it "maps legacy true to :warn_only" do
+      config.strict_reference_validation = true
+      expect(config.strict_reference_validation).to eq(:warn_only)
+    end
+
+    it "maps legacy false to :disabled" do
+      config.strict_reference_validation = false
+      expect(config.strict_reference_validation).to eq(:disabled)
+    end
+
+    it "rejects unknown values" do
+      expect { config.strict_reference_validation = :nope }
+        .to raise_error(OpenapiRuby::ConfigurationError)
+    end
   end
 
   describe "#validate!" do

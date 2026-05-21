@@ -3,7 +3,7 @@
 module OpenapiRuby
   module Middleware
     class SchemaResolver
-      def initialize(spec_path: nil, document: nil, strict_reference_validation: true)
+      def initialize(spec_path: nil, document: nil, strict_reference_validation: :warn_only)
         @spec_path = spec_path
         @document = document
         @strict_reference_validation = strict_reference_validation
@@ -41,15 +41,19 @@ module OpenapiRuby
       private
 
       def validate_document!(doc)
-        return unless @strict_reference_validation
+        return if @strict_reference_validation == :disabled
 
         schemer = JSONSchemer.openapi(doc)
         errors = schemer.validate.to_a
         return if errors.empty?
 
         error_messages = errors.first(5).map { |e| e["error"] || e.to_s }
-        raise OpenapiRuby::ConfigurationError,
-          "OpenAPI document validation failed:\n#{error_messages.join("\n")}"
+        message = "OpenAPI document validation failed:\n#{error_messages.join("\n")}"
+        if @strict_reference_validation == :enabled
+          raise OpenapiRuby::ConfigurationError, message
+        else
+          warn message
+        end
       end
 
       def load_document
