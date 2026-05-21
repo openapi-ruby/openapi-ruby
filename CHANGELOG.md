@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.1](https://github.com/openapi-ruby/openapi-ruby/compare/v3.1.0...v3.1.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* always send query params in URL, not request body ([5e9f12a](https://github.com/openapi-ruby/openapi-ruby/commit/5e9f12a8436d66259f70a688b99e8020b3a1c44d))
+* use Rack::Utils.build_nested_query for deep object query params ([8171661](https://github.com/openapi-ruby/openapi-ruby/commit/817166161aaa7e28706c975ca790d4491a82dba6))
+
 ## [3.1.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.0.3...v3.1.0) (2026-04-24)
 
 
