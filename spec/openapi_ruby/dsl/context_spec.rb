@@ -46,6 +46,42 @@ RSpec.describe OpenapiRuby::DSL::Context do
     end
   end
 
+  describe "class ref auto-resolution" do
+    before do
+      OpenapiRuby::Components::Registry.instance.clear!
+    end
+
+    def create_component(name, type: :schemas, &block)
+      klass = Class.new
+      stub_const(name, klass)
+      klass.include(OpenapiRuby::Components::Base)
+      klass.component_type(type) unless type == :schemas
+      klass.class_eval(&block) if block
+      klass
+    end
+
+    it "resolves a component class in path-level parameter schema" do
+      comp = create_component("Schemas::IdParam") do
+        schema(type: :integer)
+      end
+
+      ctx = described_class.new("/users/{id}")
+      ctx.parameter(name: :id, in: :path, schema: comp)
+
+      result = ctx.to_openapi
+      expect(result["parameters"][0]["schema"]).to eq(
+        {"$ref" => "#/components/schemas/IdParam"}
+      )
+    end
+
+    it "raises ArgumentError for non-component classes" do
+      ctx = described_class.new("/users")
+
+      expect { ctx.parameter(name: :id, in: :path, schema: String) }
+        .to raise_error(ArgumentError, /not an OpenapiRuby component/)
+    end
+  end
+
   describe "HTTP methods" do
     OpenapiRuby::DSL::Context::HTTP_METHODS.each do |method|
       it "supports #{method}" do

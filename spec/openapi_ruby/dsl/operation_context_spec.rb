@@ -155,6 +155,20 @@ RSpec.describe OpenapiRuby::DSL::OperationContext do
       )
     end
 
+    it "resolves a component class in operation-level parameter schema" do
+      comp = create_component("Schemas::FilterParam") do
+        schema(type: :string)
+      end
+
+      op = described_class.new(:get)
+      op.parameter(name: :filter, in: :query, schema: comp)
+
+      params = op.to_openapi["parameters"]
+      expect(params[0]["schema"]).to eq(
+        {"$ref" => "#/components/schemas/FilterParam"}
+      )
+    end
+
     it "resolves a component class in response schema via block" do
       comp = create_component("Schemas::User") do
         schema(type: :object)
@@ -166,6 +180,20 @@ RSpec.describe OpenapiRuby::DSL::OperationContext do
       result = op.to_openapi
       expect(result["responses"]["200"]["content"]["application/json"]["schema"]).to eq(
         {"$ref" => "#/components/schemas/User"}
+      )
+    end
+
+    it "resolves a component class nested inside array items in response" do
+      comp = create_component("Schemas::Item") do
+        schema(type: :object)
+      end
+
+      op = described_class.new(:get)
+      op.response(200, "success") { schema(type: :array, items: comp) }
+
+      result = op.to_openapi
+      expect(result["responses"]["200"]["content"]["application/json"]["schema"]["items"]).to eq(
+        {"$ref" => "#/components/schemas/Item"}
       )
     end
   end
