@@ -23,7 +23,7 @@ Single gem with modular requires:
 Key modules:
 
 - `Core` — OpenAPI document model and builder
-- `Components` — schema component system (Base, Loader, Registry, KeyTransformer)
+- `Components` — schema component system (Base, Loader, Registry, KeyTransformer). Component classes can be used directly as `$ref` shorthand in the DSL (e.g., `schema Schemas::User` instead of `schema "$ref" => "#/components/schemas/User"`). Classes also expose `.to_ref` for explicit ref generation.
 - `DSL` — framework-agnostic test DSL (Context, OperationContext, ResponseContext, MetadataStore)
 - `Adapters` — RSpec and Minitest adapters. RSpec supports two DSL styles: `path`/`run_test!` (schema and test interleaved) and `api_path`/`assert_api_response` (schema at top, normal specs below). Minitest uses the `api_path`/`assert_api_response` style.
 - `Middleware` — Rack middleware for request/response validation

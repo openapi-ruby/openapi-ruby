@@ -193,6 +193,31 @@ class Schemas::AdminUser
 end
 ```
 
+### Class References
+
+Instead of writing `$ref` strings manually, you can pass component classes directly anywhere a `$ref` is expected. This gives you typo protection (via `NameError`), IDE navigation, and less boilerplate:
+
+```ruby
+# Instead of:
+schema "$ref" => "#/components/schemas/User"
+schema type: :array, items: { "$ref" => "#/components/schemas/User" }
+
+# You can write:
+schema Schemas::User
+schema type: :array, items: Schemas::User
+```
+
+This works in `schema`, `request_body`, and anywhere nested inside hash/array definitions. Non-component classes raise `ArgumentError`.
+
+You can also use the explicit `.to_ref` method:
+
+```ruby
+Schemas::User.to_ref
+# => { "$ref" => "#/components/schemas/User" }
+```
+
+Both class refs and string `$ref` hashes are fully supported — use whichever you prefer.
+
 ### Strong Params
 
 Schema components can derive Rails strong params permit lists:
@@ -252,7 +277,7 @@ RSpec.describe "Users API", type: :openapi do
       produces "application/json"
 
       response 200, "returns all users" do
-        schema type: :array, items: { "$ref" => "#/components/schemas/User" }
+        schema type: :array, items: Schemas::User
 
         run_test! do
           expect(JSON.parse(response.body).length).to be > 0
@@ -265,19 +290,17 @@ RSpec.describe "Users API", type: :openapi do
       consumes "application/json"
 
       request_body required: true, content: {
-        "application/json" => {
-          schema: { "$ref" => "#/components/schemas/UserInput" }
-        }
+        "application/json" => { schema: Schemas::UserInput }
       }
 
       response 201, "user created" do
-        schema "$ref" => "#/components/schemas/User"
+        schema Schemas::User
         let(:request_body) { { name: "Jane", email: "jane@example.com" } }
         run_test!
       end
 
       response 422, "validation errors" do
-        schema "$ref" => "#/components/schemas/ValidationErrors"
+        schema Schemas::ValidationErrors
         let(:request_body) { { name: "" } }
         run_test!
       end
@@ -289,7 +312,7 @@ RSpec.describe "Users API", type: :openapi do
 
     get "Get a user" do
       response 200, "user found" do
-        schema "$ref" => "#/components/schemas/User"
+        schema Schemas::User
         let(:id) { User.create!(name: "Jane", email: "jane@example.com").id }
         run_test!
       end
@@ -319,7 +342,7 @@ RSpec.describe "Users API", type: :openapi do
       produces "application/json"
 
       response 200, "returns all users" do
-        schema type: :array, items: { "$ref" => "#/components/schemas/User" }
+        schema type: :array, items: Schemas::User
       end
     end
 
@@ -327,17 +350,15 @@ RSpec.describe "Users API", type: :openapi do
       consumes "application/json"
 
       request_body required: true, content: {
-        "application/json" => {
-          schema: { "$ref" => "#/components/schemas/UserInput" }
-        }
+        "application/json" => { schema: Schemas::UserInput }
       }
 
       response 201, "user created" do
-        schema "$ref" => "#/components/schemas/User"
+        schema Schemas::User
       end
 
       response 422, "validation errors" do
-        schema "$ref" => "#/components/schemas/ValidationErrors"
+        schema Schemas::ValidationErrors
       end
     end
   end
@@ -407,7 +428,7 @@ class UsersApiTest < ActionDispatch::IntegrationTest
       produces "application/json"
 
       response 200, "returns all users" do
-        schema type: :array, items: { "$ref" => "#/components/schemas/User" }
+        schema type: :array, items: Schemas::User
       end
     end
 
@@ -415,13 +436,11 @@ class UsersApiTest < ActionDispatch::IntegrationTest
       consumes "application/json"
 
       request_body required: true, content: {
-        "application/json" => {
-          schema: { "$ref" => "#/components/schemas/UserInput" }
-        }
+        "application/json" => { schema: Schemas::UserInput }
       }
 
       response 201, "user created" do
-        schema "$ref" => "#/components/schemas/User"
+        schema Schemas::User
       end
     end
   end
