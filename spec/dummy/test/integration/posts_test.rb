@@ -21,7 +21,7 @@ class PostsApiTest < ActionDispatch::IntegrationTest
       parameter name: :user_id, in: :query, schema: {type: :integer}, required: false
 
       response 200, "returns posts" do
-        schema type: :array, items: Schemas::Post
+        schema type: :array, items: {"$ref" => "#/components/schemas/Post"}
       end
     end
 
@@ -35,17 +35,17 @@ class PostsApiTest < ActionDispatch::IntegrationTest
         required: true,
         content: {
           "application/json" => {
-            schema: Schemas::PostInput
+            schema: {"$ref" => "#/components/schemas/PostInput"}
           }
         }
       )
 
       response 201, "post created" do
-        schema Schemas::Post
+        schema "$ref" => "#/components/schemas/Post"
       end
 
       response 422, "validation errors" do
-        schema Schemas::ValidationErrors
+        schema "$ref" => "#/components/schemas/ValidationErrors"
       end
     end
   end
@@ -57,11 +57,11 @@ class PostsApiTest < ActionDispatch::IntegrationTest
       produces "application/json"
 
       response 200, "post found" do
-        schema Schemas::Post
+        schema "$ref" => "#/components/schemas/Post"
       end
 
       response 404, "post not found" do
-        schema Schemas::ErrorResponse
+        schema "$ref" => "#/components/schemas/ErrorResponse"
       end
     end
 
@@ -72,7 +72,7 @@ class PostsApiTest < ActionDispatch::IntegrationTest
       response 204, "post deleted"
 
       response 404, "post not found" do
-        schema Schemas::ErrorResponse
+        schema "$ref" => "#/components/schemas/ErrorResponse"
       end
     end
   end
