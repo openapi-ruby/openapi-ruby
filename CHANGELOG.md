@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.2.0...v3.3.0) (2026-05-22)
+
+
+### Features
+
+* support Ruby component classes as $ref shorthand ([#26](https://github.com/openapi-ruby/openapi-ruby/issues/26)) ([e4e51bf](https://github.com/openapi-ruby/openapi-ruby/commit/e4e51bfdbf45b9a3dbf7ef95ce8519c518b2418e))
+
 ## [3.2.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.1.1...v3.2.0) (2026-05-21)
 
 
