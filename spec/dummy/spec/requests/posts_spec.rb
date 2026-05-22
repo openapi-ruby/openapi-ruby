@@ -21,7 +21,7 @@ RSpec.describe "Posts API (api_path style)", type: :openapi do
       parameter name: :user_id, in: :query, schema: {type: :integer}, required: false
 
       response 200, "returns posts" do
-        schema type: :array, items: {"$ref" => "#/components/schemas/Post"}
+        schema type: :array, items: Schemas::Post
       end
     end
 
@@ -35,17 +35,17 @@ RSpec.describe "Posts API (api_path style)", type: :openapi do
         required: true,
         content: {
           "application/json" => {
-            schema: {"$ref" => "#/components/schemas/PostInput"}
+            schema: Schemas::PostInput
           }
         }
       )
 
       response 201, "post created" do
-        schema "$ref" => "#/components/schemas/Post"
+        schema Schemas::Post
       end
 
       response 422, "validation errors" do
-        schema "$ref" => "#/components/schemas/ValidationErrors"
+        schema Schemas::ValidationErrors
       end
     end
   end
@@ -57,11 +57,11 @@ RSpec.describe "Posts API (api_path style)", type: :openapi do
       produces "application/json"
 
       response 200, "post found" do
-        schema "$ref" => "#/components/schemas/Post"
+        schema Schemas::Post
       end
 
       response 404, "post not found" do
-        schema "$ref" => "#/components/schemas/ErrorResponse"
+        schema Schemas::ErrorResponse
       end
     end
 
@@ -72,7 +72,7 @@ RSpec.describe "Posts API (api_path style)", type: :openapi do
       response 204, "post deleted"
 
       response 404, "post not found" do
-        schema "$ref" => "#/components/schemas/ErrorResponse"
+        schema Schemas::ErrorResponse
       end
     end
   end

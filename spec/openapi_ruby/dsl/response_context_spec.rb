@@ -57,6 +57,55 @@ RSpec.describe OpenapiRuby::DSL::ResponseContext do
     end
   end
 
+  describe "class ref auto-resolution" do
+    before do
+      OpenapiRuby::Components::Registry.instance.clear!
+    end
+
+    def create_component(name, &block)
+      klass = Class.new
+      stub_const(name, klass)
+      klass.include(OpenapiRuby::Components::Base)
+      klass.class_eval(&block) if block
+      klass
+    end
+
+    it "resolves a component class passed directly to schema" do
+      comp = create_component("Schemas::User") do
+        schema(type: :object)
+      end
+
+      ctx = described_class.new(200, "success")
+      ctx.schema(comp)
+
+      result = ctx.to_openapi
+      expect(result["content"]["application/json"]["schema"]).to eq(
+        {"$ref" => "#/components/schemas/User"}
+      )
+    end
+
+    it "resolves a component class inside items" do
+      comp = create_component("Schemas::Item") do
+        schema(type: :object)
+      end
+
+      ctx = described_class.new(200, "success")
+      ctx.schema(type: :array, items: comp)
+
+      result = ctx.to_openapi
+      expect(result["content"]["application/json"]["schema"]["items"]).to eq(
+        {"$ref" => "#/components/schemas/Item"}
+      )
+    end
+
+    it "raises ArgumentError for non-component classes" do
+      ctx = described_class.new(200, "success")
+
+      expect { ctx.schema(type: :object, items: String) }
+        .to raise_error(ArgumentError, /not an OpenapiRuby component/)
+    end
+  end
+
   describe "#status_code" do
     it "converts to string" do
       ctx = described_class.new(201, "created")

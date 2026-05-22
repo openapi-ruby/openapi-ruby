@@ -15,7 +15,7 @@ RSpec.describe "Users API", type: :openapi do
       produces "application/json"
 
       response 200, "returns all users" do
-        schema type: :array, items: {"$ref" => "#/components/schemas/User"}
+        schema type: :array, items: Schemas::User
 
         before { User.create!(name: "Jane", email: "jane@example.com") }
 
@@ -39,7 +39,7 @@ RSpec.describe "Users API", type: :openapi do
       parameter name: :email, in: :query, schema: {type: :string}, required: true
 
       response 201, "user created" do
-        schema "$ref" => "#/components/schemas/User"
+        schema Schemas::User
 
         let(:name) { "Jane" }
         let(:email) { "jane@example.com" }
@@ -53,7 +53,7 @@ RSpec.describe "Users API", type: :openapi do
       end
 
       response 422, "validation errors" do
-        schema "$ref" => "#/components/schemas/ValidationErrors"
+        schema Schemas::ValidationErrors
 
         let(:name) { "" }
         let(:email) { "" }
@@ -76,7 +76,7 @@ RSpec.describe "Users API", type: :openapi do
       produces "application/json"
 
       response 200, "user found" do
-        schema "$ref" => "#/components/schemas/User"
+        schema Schemas::User
 
         let(:id) { User.create!(name: "Jane", email: "jane@example.com").id }
 
@@ -88,7 +88,7 @@ RSpec.describe "Users API", type: :openapi do
       end
 
       response 404, "user not found" do
-        schema "$ref" => "#/components/schemas/ErrorResponse"
+        schema Schemas::ErrorResponse
 
         let(:id) { 0 }
 
@@ -109,7 +109,7 @@ RSpec.describe "Users API", type: :openapi do
       parameter name: :email, in: :query, schema: {type: :string}
 
       response 200, "user updated" do
-        schema "$ref" => "#/components/schemas/User"
+        schema Schemas::User
 
         let(:id) { User.create!(name: "Jane", email: "jane@example.com").id }
         let(:name) { "Jane Updated" }
@@ -121,7 +121,7 @@ RSpec.describe "Users API", type: :openapi do
       end
 
       response 404, "user not found" do
-        schema "$ref" => "#/components/schemas/ErrorResponse"
+        schema Schemas::ErrorResponse
 
         let(:id) { 0 }
 
@@ -142,7 +142,7 @@ RSpec.describe "Users API", type: :openapi do
       end
 
       response 404, "user not found" do
-        schema "$ref" => "#/components/schemas/ErrorResponse"
+        schema Schemas::ErrorResponse
 
         let(:id) { 0 }
 

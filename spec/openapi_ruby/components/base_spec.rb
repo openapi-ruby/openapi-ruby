@@ -183,6 +183,63 @@ RSpec.describe OpenapiRuby::Components::Base do
     end
   end
 
+  describe ".to_ref" do
+    it "returns a $ref hash for schemas" do
+      comp = create_component("Schemas::RefUser") do
+        schema(type: :object)
+      end
+
+      expect(comp.to_ref).to eq({"$ref" => "#/components/schemas/RefUser"})
+    end
+
+    it "returns a $ref hash for non-schema component types" do
+      comp = create_component("Params::PageParam") do
+        component_type :parameters
+        schema(name: :page, in: :query, schema: {type: :integer})
+      end
+
+      expect(comp.to_ref).to eq({"$ref" => "#/components/parameters/PageParam"})
+    end
+  end
+
+  describe "class ref auto-resolution in schema definitions" do
+    it "resolves a component class to a $ref in schema properties" do
+      ref_target = create_component("Schemas::Address") do
+        schema(type: :object, properties: {street: {type: :string}})
+      end
+
+      comp = create_component("Schemas::Person") do
+        schema(type: :object, properties: {address: ref_target})
+      end
+
+      expect(comp.schema["properties"]["address"]).to eq(
+        {"$ref" => "#/components/schemas/Address"}
+      )
+    end
+
+    it "resolves a component class inside an array items" do
+      ref_target = create_component("Schemas::Tag") do
+        schema(type: :object)
+      end
+
+      comp = create_component("Schemas::Article") do
+        schema(type: :object, properties: {tags: {type: :array, items: ref_target}})
+      end
+
+      expect(comp.schema["properties"]["tags"]["items"]).to eq(
+        {"$ref" => "#/components/schemas/Tag"}
+      )
+    end
+
+    it "raises ArgumentError for non-component classes" do
+      expect {
+        create_component("Schemas::Bad") do
+          schema(type: :object, properties: {thing: String})
+        end
+      }.to raise_error(ArgumentError, /not an OpenapiRuby component/)
+    end
+  end
+
   describe ".registry_key" do
     it "returns component_name when no scopes" do
       comp = create_component("Schemas::UnscoppedComp") do

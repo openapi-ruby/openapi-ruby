@@ -85,6 +85,10 @@ module OpenapiRuby
           end
         end
 
+        def to_ref
+          OpenapiRuby::Core::RefResolver.ref_object(_component_type, component_name)
+        end
+
         def to_openapi
           definition = _schema_definition.deep_dup
 
@@ -147,6 +151,12 @@ module OpenapiRuby
 
         def deep_stringify(value)
           case value
+          when Class
+            if value < OpenapiRuby::Components::Base
+              value.to_ref
+            else
+              raise ArgumentError, "#{value} is not an OpenapiRuby component"
+            end
           when Hash
             value.each_with_object({}) { |(k, v), h| h[k.to_s] = deep_stringify(v) }
           when Array
