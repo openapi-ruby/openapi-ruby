@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.3.0...v3.4.0) (2026-06-08)
+
+
+### Features
+
+* add FRAMEWORK=hybrid mode for migrations ([#28](https://github.com/openapi-ruby/openapi-ruby/issues/28)) ([5e77661](https://github.com/openapi-ruby/openapi-ruby/commit/5e77661f297e2736a0b5dd4787ec73b7ce14c8c0))
+
 ## [3.3.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.2.0...v3.3.0) (2026-05-22)
 
 
