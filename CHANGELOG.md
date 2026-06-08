@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.4.0...v3.5.0) (2026-06-08)
+
+
+### Features
+
+* expose OpenapiRuby.schema_generating? helper ([#31](https://github.com/openapi-ruby/openapi-ruby/issues/31)) ([fc51f43](https://github.com/openapi-ruby/openapi-ruby/commit/fc51f436777c2b7a1f0c2aa4717f60d035a28c57))
+
 ## [3.4.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.3.0...v3.4.0) (2026-06-08)
 
 
