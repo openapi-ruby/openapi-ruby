@@ -27,6 +27,22 @@ module OpenapiRuby
     def reset_configuration!
       @configuration = Configuration.new
     end
+
+    # True when the current process was started by `openapi_ruby:generate`
+    # (the rake task sets OPENAPI_RUBY_GENERATING=true in the subprocess).
+    #
+    # Useful in consumer test helpers to guard test-framework requires
+    # that conflict when both `rspec/rails` and `rails/test_help` load
+    # in the same process (the FRAMEWORK=hybrid case):
+    #
+    #   # test/test_helper.rb
+    #   unless OpenapiRuby.schema_generating?
+    #     require "rails/test_help"
+    #     # ...other test-time setup...
+    #   end
+    def schema_generating?
+      ENV["OPENAPI_RUBY_GENERATING"] == "true"
+    end
   end
 end
 

@@ -481,7 +481,7 @@ Two things to set up on the consumer side so the two test frameworks don't both 
 
 ```ruby
 # test/test_helper.rb
-unless ENV["OPENAPI_RUBY_GENERATING"]
+unless OpenapiRuby.schema_generating?
   require "rails/test_help"
   # ...other test-time setup...
 end
@@ -489,13 +489,15 @@ end
 
 ```ruby
 # spec/rails_helper.rb
-unless ENV["OPENAPI_RUBY_GENERATING"]
+unless OpenapiRuby.schema_generating?
   require "rspec/rails"
   # ...other spec-time setup...
 end
 ```
 
-The rake task sets `OPENAPI_RUBY_GENERATING=true` in the subprocess. With the guards in place, neither test framework boots its full Rails integration during generation — only the DSL needs to be live for `api_path` / `path` to register.
+`OpenapiRuby.schema_generating?` returns `true` when the rake task launched the current process (it sets `OPENAPI_RUBY_GENERATING=true` in the subprocess). With the guards in place, neither test framework boots its full Rails integration during generation — only the DSL needs to be live for `api_path` / `path` to register.
+
+The guards are only needed while both frameworks are live. Once the migration completes and only one test framework remains, the rake task auto-detects that framework and the guard becomes dead code that can be removed.
 
 ## Runtime Middleware
 

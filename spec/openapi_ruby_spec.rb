@@ -25,4 +25,28 @@ RSpec.describe OpenapiRuby do
       expect(described_class.configuration.schema_output_format).to eq(:yaml)
     end
   end
+
+  describe ".schema_generating?" do
+    around do |example|
+      original = ENV["OPENAPI_RUBY_GENERATING"]
+      example.run
+    ensure
+      ENV["OPENAPI_RUBY_GENERATING"] = original
+    end
+
+    it "is true when OPENAPI_RUBY_GENERATING is 'true'" do
+      ENV["OPENAPI_RUBY_GENERATING"] = "true"
+      expect(described_class.schema_generating?).to be(true)
+    end
+
+    it "is false when OPENAPI_RUBY_GENERATING is unset" do
+      ENV.delete("OPENAPI_RUBY_GENERATING")
+      expect(described_class.schema_generating?).to be(false)
+    end
+
+    it "is false for any other value" do
+      ENV["OPENAPI_RUBY_GENERATING"] = "1"
+      expect(described_class.schema_generating?).to be(false)
+    end
+  end
 end

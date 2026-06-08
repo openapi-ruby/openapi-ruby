@@ -63,7 +63,7 @@ module OpenapiRuby
       # during a phased RSpec → Minitest migration where the suite
       # holds both DSL styles. Consumers should guard
       # `require "rails/test_help"` and `require "rspec/rails"` in
-      # their test helpers with `unless ENV["OPENAPI_RUBY_GENERATING"]`
+      # their test helpers with `unless OpenapiRuby.schema_generating?`
       # so the two test frameworks don't both register Rails lazy
       # hooks in the same process — only the DSL needs to be live for
       # schema generation.
