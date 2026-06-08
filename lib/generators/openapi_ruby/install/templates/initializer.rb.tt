@@ -17,7 +17,7 @@ OpenapiRuby.configure do |config|
   config.camelize_keys = true
 
   # Generated schema output
-  config.schema_output_dir = "swagger"
+  config.schema_output_dir = "openapi"
   config.schema_output_format = :yaml
 
   # Runtime request/response validation middleware

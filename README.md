@@ -44,7 +44,7 @@ This creates:
 - `config/initializers/openapi_ruby.rb` — configuration
 - `spec/openapi_helper.rb` or `test/openapi_helper.rb` — test helper
 - `app/api_components/` — directory for schema components
-- `swagger/` — output directory for generated specs
+- `openapi/` — output directory for generated specs
 - Engine mount in `config/routes.rb`
 
 ## Configuration
@@ -61,7 +61,7 @@ OpenapiRuby.configure do |config|
 
   config.component_paths = ["app/api_components"]
   config.camelize_keys = true
-  config.schema_output_dir = "swagger"
+  config.schema_output_dir = "openapi"
   config.schema_output_format = :yaml
 
   # Runtime middleware (disabled by default)

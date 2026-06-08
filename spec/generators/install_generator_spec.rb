@@ -46,9 +46,9 @@ RSpec.describe OpenapiRuby::Generators::InstallGenerator do
     expect(Dir.exist?(File.join(destination, "app/api_components/security_schemes"))).to be true
   end
 
-  it "creates swagger output directory" do
+  it "creates openapi output directory" do
     run_generator
-    expect(Dir.exist?(File.join(destination, "swagger"))).to be true
+    expect(Dir.exist?(File.join(destination, "openapi"))).to be true
   end
 
   it "adds engine route" do

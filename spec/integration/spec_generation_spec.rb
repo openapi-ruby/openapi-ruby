@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Validates that:
-# 1. The static swagger/public_api.yaml in the dummy app is valid OpenAPI 3.1
+# 1. The static openapi/public_api.yaml in the dummy app is valid OpenAPI 3.1
 # 2. The generation pipeline produces output matching that static spec
 # 3. All endpoints and components are present and correctly structured
 
@@ -11,7 +11,7 @@ require "tmpdir"
 require "securerandom"
 
 RSpec.describe "OpenAPI spec generation" do
-  let(:static_spec_path) { File.expand_path("../dummy/swagger/public_api.yaml", __dir__) }
+  let(:static_spec_path) { File.expand_path("../dummy/openapi/public_api.yaml", __dir__) }
   let(:static_spec) { YAML.safe_load_file(static_spec_path) }
 
   describe "static spec file" do
@@ -20,7 +20,7 @@ RSpec.describe "OpenAPI spec generation" do
       errors = schemer.validate.to_a
 
       expect(errors).to be_empty,
-        "swagger/public_api.yaml is not valid OpenAPI 3.1:\n#{errors.map { |e| e["error"] }.join("\n")}"
+        "openapi/public_api.yaml is not valid OpenAPI 3.1:\n#{errors.map { |e| e["error"] }.join("\n")}"
     end
 
     it "documents all User endpoints" do

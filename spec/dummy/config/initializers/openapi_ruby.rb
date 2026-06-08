@@ -10,8 +10,8 @@ OpenapiRuby.configure do |config|
 
   config.component_paths = [Rails.root.join("app/api_components").to_s]
   config.camelize_keys = false
-  # Use tmp dir for generated output so we don't overwrite the hand-maintained swagger/public_api.yaml
-  config.schema_output_dir = Rails.root.join("tmp/swagger").to_s
+  # Use tmp dir for generated output so we don't overwrite the hand-maintained openapi/public_api.yaml
+  config.schema_output_dir = Rails.root.join("tmp/openapi").to_s
   config.schema_output_format = :yaml
   config.ui_enabled = false
 end

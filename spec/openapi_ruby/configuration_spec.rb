@@ -30,8 +30,8 @@ RSpec.describe OpenapiRuby::Configuration do
       expect(config.coerce_params).to be true
     end
 
-    it "sets schema_output_dir to swagger" do
-      expect(config.schema_output_dir).to eq("swagger")
+    it "sets schema_output_dir to openapi" do
+      expect(config.schema_output_dir).to eq("openapi")
     end
 
     it "sets schema_output_format to yaml" do

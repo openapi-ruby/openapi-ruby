@@ -51,7 +51,7 @@ module OpenapiRuby
       @response_validation = :disabled
       @coerce_params = true
       @test_request_validation = true
-      @schema_output_dir = "swagger"
+      @schema_output_dir = "openapi"
       @schema_output_format = :yaml
       @ui_enabled = false
       @ui_path = "/api-docs"

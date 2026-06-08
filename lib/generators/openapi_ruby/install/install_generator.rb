@@ -25,8 +25,8 @@ module OpenapiRuby
         empty_directory "app/api_components/security_schemes"
       end
 
-      def create_swagger_directory
-        empty_directory "swagger"
+      def create_schema_output_directory
+        empty_directory "openapi"
       end
 
       def mount_engine
