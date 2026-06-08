@@ -469,9 +469,33 @@ Generate OpenAPI spec files without running tests:
 rake openapi_ruby:generate
 ```
 
-This loads spec/test files to collect API definitions and writes schemas without running any tests. It auto-detects the test framework, or you can set `FRAMEWORK=rspec` or `FRAMEWORK=minitest`. Custom patterns: `PATTERN="packs/*/spec/**/*_spec.rb"`.
+This loads spec/test files to collect API definitions and writes schemas without running any tests. It auto-detects the test framework, or you can set `FRAMEWORK=rspec`, `FRAMEWORK=minitest`, or `FRAMEWORK=hybrid`. Custom patterns: `PATTERN="packs/*/spec/**/*_spec.rb"`.
 
 Schemas are **only** written by the rake task — running tests (`bundle exec rspec`, `rails test`) does not generate or overwrite schema files. This prevents partial schema overwrites when running a subset of specs.
+
+### Migrating from RSpec to Minitest (or vice versa)
+
+When both `spec/spec_helper.rb` and `test/test_helper.rb` are present, the rake task auto-selects `FRAMEWORK=hybrid` — it requires both adapters and loads both glob patterns (`spec/**/*_spec.rb,test/**/*_test.rb`) into one process. Style 1 `path(...)` and Style 2 `api_path(...)` definitions register into the same `MetadataStore`, so a single schema file holds paths contributed by either DSL.
+
+Two things to set up on the consumer side so the two test frameworks don't both wire themselves into Rails' lazy-load hooks during schema generation:
+
+```ruby
+# test/test_helper.rb
+unless ENV["OPENAPI_RUBY_GENERATING"]
+  require "rails/test_help"
+  # ...other test-time setup...
+end
+```
+
+```ruby
+# spec/rails_helper.rb
+unless ENV["OPENAPI_RUBY_GENERATING"]
+  require "rspec/rails"
+  # ...other spec-time setup...
+end
+```
+
+The rake task sets `OPENAPI_RUBY_GENERATING=true` in the subprocess. With the guards in place, neither test framework boots its full Rails integration during generation — only the DSL needs to be live for `api_path` / `path` to register.
 
 ## Runtime Middleware
 
