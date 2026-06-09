@@ -46,12 +46,12 @@ module OpenapiRuby
       end
 
       def to_json(*_args)
-        JSON.pretty_generate(@data)
+        JSON.pretty_generate(to_h)
       end
 
       def to_yaml
         require "yaml"
-        @data.to_yaml
+        to_h.to_yaml
       end
 
       def valid?

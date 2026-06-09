@@ -61,18 +61,23 @@ RSpec.describe OpenapiRuby::Generator::RakeTaskSupport do
       expect(script).to include('require "openapi_ruby/minitest"')
     end
 
-    it "adds both load paths" do
-      expect(script).to include('File.expand_path("spec")')
-      expect(script).to include('File.expand_path("test")')
+    it "scopes spec globs to the spec/ load path" do
+      expect(script).to include('load_with_path.call("spec", "spec/**/*_spec.rb")')
     end
 
-    it "loads each pattern" do
-      expect(script).to include('Dir.glob("spec/**/*_spec.rb")')
-      expect(script).to include('Dir.glob("test/**/*_test.rb")')
+    it "scopes test globs to the test/ load path" do
+      expect(script).to include('load_with_path.call("test", "test/**/*_test.rb")')
     end
 
     it "calls SchemaWriter.generate_all!" do
       expect(script).to include("OpenapiRuby::Generator::SchemaWriter.generate_all!")
+    end
+
+    it "ensures each glob resolves its own helper file" do
+      # When spec/ and test/ both define a require-able file with the
+      # same name (e.g. openapi_helper.rb), the spec glob must resolve
+      # to the spec/ version and the test glob to the test/ version.
+      expect(script.scan("load_with_path.call").size).to eq(2)
     end
   end
 

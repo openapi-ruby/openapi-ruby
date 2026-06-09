@@ -67,14 +67,40 @@ module OpenapiRuby
       # so the two test frameworks don't both register Rails lazy
       # hooks in the same process — only the DSL needs to be live for
       # schema generation.
+      #
+      # Each glob runs with its own framework's directory at the head
+      # of $LOAD_PATH so the typical `require "openapi_helper"` /
+      # `require "rails_helper"` / `require "test_helper"` resolves
+      # to the right file. Without this, both spec/ and test/ getting
+      # unshifted in one block leads to whichever was unshifted last
+      # winning every lookup — and the wrong helper getting loaded
+      # for the other side's files.
       def hybrid_script(pattern)
+        globs = pattern.split(",").map(&:strip)
+        spec_globs = globs.grep(%r{\bspec/})
+        test_globs = globs.grep(%r{\btest/})
+        other_globs = globs - spec_globs - test_globs
+
         <<~RUBY
           require "rspec/core"
           require "openapi_ruby/rspec"
           require "openapi_ruby/minitest"
-          $LOAD_PATH.unshift(File.expand_path("spec")) unless $LOAD_PATH.include?(File.expand_path("spec"))
-          $LOAD_PATH.unshift(File.expand_path("test")) unless $LOAD_PATH.include?(File.expand_path("test"))
-          #{glob_loads(pattern)}
+
+          load_with_path = lambda do |dir, glob|
+            path = File.expand_path(dir)
+            added = !$LOAD_PATH.include?(path)
+            $LOAD_PATH.unshift(path) if added
+            begin
+              Dir.glob(glob).sort.each { |f| require File.expand_path(f) }
+            ensure
+              $LOAD_PATH.delete(path) if added
+            end
+          end
+
+          #{spec_globs.map { |g| "load_with_path.call(\"spec\", #{g.inspect})" }.join("\n          ")}
+          #{test_globs.map { |g| "load_with_path.call(\"test\", #{g.inspect})" }.join("\n          ")}
+          #{other_globs.map { |g| %[Dir.glob(#{g.inspect}).sort.each { |f| require File.expand_path(f) }] }.join("\n          ")}
+
           OpenapiRuby::Generator::SchemaWriter.generate_all!
         RUBY
       end
