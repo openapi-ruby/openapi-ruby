@@ -8,6 +8,7 @@ module OpenapiRuby
       config = OpenapiRuby.configuration
       @schemas = config.schemas
       @ui_config = config.ui_config
+      @oauth_config = resolve_oauth_config(config.oauth_config)
 
       render html: swagger_ui_html.html_safe
     end
@@ -42,7 +43,7 @@ module OpenapiRuby
           <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
           <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
           <script>
-            SwaggerUIBundle({
+            const ui = SwaggerUIBundle({
               #{schema_urls_js},
               dom_id: '#swagger-ui',
               deepLinking: true,
@@ -55,7 +56,7 @@ module OpenapiRuby
               ],
               layout: "#{(@schemas.size > 1) ? "StandaloneLayout" : "BaseLayout"}",
               #{ui_config_js}
-            });
+            });#{init_oauth_js}
           </script>
         </body>
         </html>
@@ -82,6 +83,19 @@ module OpenapiRuby
       @ui_config.except(:title).map { |k, v|
         "#{k}: #{v.to_json}"
       }.join(",\n          ")
+    end
+
+    def resolve_oauth_config(cfg)
+      return {} if cfg.nil?
+      return cfg.call(self) if cfg.respond_to?(:call)
+
+      cfg
+    end
+
+    def init_oauth_js
+      return "" if @oauth_config.empty?
+
+      "\n            ui.initOAuth(#{@oauth_config.to_json});"
     end
   end
 end
