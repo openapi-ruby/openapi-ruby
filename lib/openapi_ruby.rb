@@ -71,4 +71,14 @@ require_relative "openapi_ruby/middleware/schema_resolver"
 require_relative "openapi_ruby/middleware/request_validation"
 require_relative "openapi_ruby/middleware/response_validation"
 require_relative "openapi_ruby/controller_helpers"
-require_relative "openapi_ruby/engine" if defined?(Rails::Engine)
+if defined?(Rails::Engine)
+  require_relative "openapi_ruby/engine"
+else
+  # Rails wasn't loaded when openapi_ruby was required (e.g. the
+  # schema-generation subprocess requires openapi_ruby/rspec before
+  # any spec file boots Rails). Defer loading via autoload so the
+  # `mount OpenapiRuby::Engine` in routes resolves once Rails arrives.
+  module OpenapiRuby
+    autoload :Engine, "openapi_ruby/engine"
+  end
+end
