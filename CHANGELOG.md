@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.0.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.5.2...v4.0.0) (2026-06-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* Configuration#schema_output_dir now defaults to "openapi" instead of "swagger". The Swagger name predates the 2016 rename to OpenAPI; the gem only supports OpenAPI 3.0/3.1, so the default should reflect that.
+* Swagger UI is now served at the engine mount root instead of `<mount>/ui`. Update bookmarks and any links accordingly. The `config.ui_path` configuration option has been removed.
+
+### Features
+
+* default schema_output_dir to "openapi" ([#30](https://github.com/openapi-ruby/openapi-ruby/issues/30)) ([51c1a5b](https://github.com/openapi-ruby/openapi-ruby/commit/51c1a5b5004f8c22a6402a8fa86cd0f1524e0e74))
+* serve Swagger UI at engine mount root ([#37](https://github.com/openapi-ruby/openapi-ruby/issues/37)) ([85e93d6](https://github.com/openapi-ruby/openapi-ruby/commit/85e93d6bd3c2fe263196e5fcbdc86decb7d2ce7e))
+
 ## [3.5.2](https://github.com/openapi-ruby/openapi-ruby/compare/v3.5.1...v3.5.2) (2026-06-09)
 
 
