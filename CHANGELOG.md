@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/openapi-ruby/openapi-ruby/compare/v3.5.0...v3.5.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* stable output and per-glob load paths in hybrid mode ([#33](https://github.com/openapi-ruby/openapi-ruby/issues/33)) ([763b7c7](https://github.com/openapi-ruby/openapi-ruby/commit/763b7c7bf452c2663404124abfbfb3614e146048))
+
 ## [3.5.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.4.0...v3.5.0) (2026-06-08)
 
 
