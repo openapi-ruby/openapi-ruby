@@ -40,7 +40,7 @@ module OpenapiRuby
     end
 
     # UI (optional)
-    attr_accessor :ui_enabled, :ui_path, :ui_config
+    attr_accessor :ui_enabled, :ui_config
 
     def initialize
       @schemas = {}
@@ -54,7 +54,6 @@ module OpenapiRuby
       @schema_output_dir = "swagger"
       @schema_output_format = :yaml
       @ui_enabled = false
-      @ui_path = "/api-docs"
       @ui_config = {}
       @strict_reference_validation = :warn_only
       @auto_validation_error_response = true

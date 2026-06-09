@@ -72,8 +72,6 @@ OpenapiRuby.configure do |config|
   # Enabled by default; set to false to disable.
   config.test_request_validation = true
 
-  # Optional Swagger UI (disabled by default)
-  config.ui_enabled = false
 end
 ```
 
@@ -532,7 +530,16 @@ config.schemas = {
 
 ## Swagger UI
 
-Enable optional Swagger UI:
+Mount the engine to expose the schema endpoints:
+
+```ruby
+# config/routes.rb
+mount OpenapiRuby::Engine => "/api-docs"
+```
+
+Schema files are served at `/api-docs/schemas/:name`.
+
+To also serve the interactive Swagger UI at the mount root, opt in:
 
 ```ruby
 OpenapiRuby.configure do |config|
@@ -540,14 +547,7 @@ OpenapiRuby.configure do |config|
 end
 ```
 
-Visit `/api-docs/ui` to see your API documentation. Schema files are served at `/api-docs/schemas/:name`.
-
-## Engine Routes
-
-```ruby
-# config/routes.rb
-mount OpenapiRuby::Engine => "/api-docs"
-```
+Then visit `/api-docs` for the UI. When `ui_enabled` is `false` (the default), `/api-docs` returns 404 and only the schema endpoints are served — useful when downstream tooling needs the schema but you don't want to expose an interactive explorer.
 
 ## License
 

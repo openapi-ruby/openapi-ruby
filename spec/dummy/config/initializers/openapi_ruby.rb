@@ -13,5 +13,4 @@ OpenapiRuby.configure do |config|
   # Use tmp dir for generated output so we don't overwrite the hand-maintained swagger/public_api.yaml
   config.schema_output_dir = Rails.root.join("tmp/swagger").to_s
   config.schema_output_format = :yaml
-  config.ui_enabled = false
 end

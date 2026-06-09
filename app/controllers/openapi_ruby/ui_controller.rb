@@ -5,8 +5,6 @@ module OpenapiRuby
     layout false
 
     def index
-      return head :not_found unless OpenapiRuby.configuration.ui_enabled
-
       config = OpenapiRuby.configuration
       @schemas = config.schemas
       @ui_config = config.ui_config
@@ -15,8 +13,6 @@ module OpenapiRuby
     end
 
     def oauth2_redirect
-      return head :not_found unless OpenapiRuby.configuration.ui_enabled
-
       file = File.join(OpenapiRuby::Engine.root, "app", "views", "openapi_ruby", "oauth2_redirect.html")
       render file: file, layout: false, content_type: "text/html"
     end

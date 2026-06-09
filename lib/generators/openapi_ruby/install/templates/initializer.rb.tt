@@ -25,7 +25,7 @@ OpenapiRuby.configure do |config|
   config.request_validation = :disabled
   config.response_validation = :disabled
 
-  # Swagger UI (optional, disabled by default)
+  # Swagger UI at the engine's mount path (disabled by default).
+  # When false, only the schema endpoints are served.
   config.ui_enabled = false
-  # config.ui_path = "/api-docs"
 end
