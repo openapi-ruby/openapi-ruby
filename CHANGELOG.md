@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.2](https://github.com/openapi-ruby/openapi-ruby/compare/v3.5.1...v3.5.2) (2026-06-09)
+
+
+### Bug Fixes
+
+* autoload Engine when Rails loads after openapi_ruby ([#35](https://github.com/openapi-ruby/openapi-ruby/issues/35)) ([d1cb8d9](https://github.com/openapi-ruby/openapi-ruby/commit/d1cb8d9b61491b489161a58e6abf121322aa21ac))
+
 ## [3.5.1](https://github.com/openapi-ruby/openapi-ruby/compare/v3.5.0...v3.5.1) (2026-06-09)
 
 
