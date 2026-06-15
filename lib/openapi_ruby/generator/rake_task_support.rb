@@ -54,6 +54,7 @@ module OpenapiRuby
       def minitest_script(pattern)
         <<~RUBY
           require "openapi_ruby/minitest"
+          $LOAD_PATH.unshift(File.expand_path("test")) unless $LOAD_PATH.include?(File.expand_path("test"))
           #{glob_loads(pattern)}
           OpenapiRuby::Generator::SchemaWriter.generate_all!
         RUBY

@@ -51,6 +51,26 @@ RSpec.describe OpenapiRuby::Generator::RakeTaskSupport do
     end
   end
 
+  describe ".generate_script for rspec" do
+    let(:script) do
+      described_class.generate_script("rspec", "spec/**/*_spec.rb")
+    end
+
+    it "puts spec/ on $LOAD_PATH so `require \"spec_helper\"` / `require \"rails_helper\"` resolve" do
+      expect(script).to include('$LOAD_PATH.unshift(File.expand_path("spec"))')
+    end
+  end
+
+  describe ".generate_script for minitest" do
+    let(:script) do
+      described_class.generate_script("minitest", "test/**/*_test.rb")
+    end
+
+    it "puts test/ on $LOAD_PATH so `require \"test_helper\"` / `require \"openapi_helper\"` resolve" do
+      expect(script).to include('$LOAD_PATH.unshift(File.expand_path("test"))')
+    end
+  end
+
   describe ".generate_script for hybrid" do
     let(:script) do
       described_class.generate_script("hybrid", "spec/**/*_spec.rb,test/**/*_test.rb")
