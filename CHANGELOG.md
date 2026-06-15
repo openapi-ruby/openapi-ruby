@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/openapi-ruby/openapi-ruby/compare/v4.0.0...v4.0.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* put test/ on $LOAD_PATH during minitest schema generation ([#40](https://github.com/openapi-ruby/openapi-ruby/issues/40)) ([1d18813](https://github.com/openapi-ruby/openapi-ruby/commit/1d1881398654c566824b9b5aa40e11764440dfca))
+
 ## [4.0.0](https://github.com/openapi-ruby/openapi-ruby/compare/v3.5.2...v4.0.0) (2026-06-09)
 
 
