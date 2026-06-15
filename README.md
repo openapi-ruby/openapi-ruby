@@ -549,6 +549,59 @@ end
 
 Then visit `/api-docs` for the UI. When `ui_enabled` is `false` (the default), `/api-docs` returns 404 and only the schema endpoints are served — useful when downstream tooling needs the schema but you don't want to expose an interactive explorer.
 
+### Customizing Swagger UI
+
+Pass any [Swagger UI configuration option](https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/) through `ui_config`. Values are JSON-serialized into the rendered HTML, so use plain Ruby types (Strings, Symbols, Booleans, Hashes, Arrays):
+
+```ruby
+OpenapiRuby.configure do |config|
+  config.ui_enabled = true
+  config.ui_config = {
+    title: "My API Docs",                    # rendered as the <title>
+    docExpansion: "none",
+    defaultModelsExpandDepth: -1,
+    oauth2RedirectUrl: "https://example.com/api-docs/oauth2-redirect.html"
+  }
+end
+```
+
+Anything you put in `ui_config` is served to every visitor of the UI — do **not** put secrets here.
+
+### OAuth in Swagger UI
+
+Swagger UI's OAuth options (`clientId`, `appName`, `usePkceWithAuthorizationCodeGrant`, etc.) must be supplied via `initOAuth` *after* the UI is constructed. Set them on `oauth_config`:
+
+```ruby
+OpenapiRuby.configure do |config|
+  config.ui_enabled = true
+  config.oauth_config = {
+    clientId: ENV["SWAGGER_OAUTH_CLIENT_ID"],
+    appName: "My API",
+    usePkceWithAuthorizationCodeGrant: true
+  }
+end
+```
+
+`oauth_config` also accepts a callable that receives the UI controller and returns a Hash, so you can defer database access until the first UI request:
+
+```ruby
+OpenapiRuby.configure do |config|
+  config.ui_enabled = true
+  config.oauth_config = ->(controller) {
+    client = OauthClient.find_by!(name: "swagger_ui")
+    {
+      clientId: client.client_id,
+      appName: "My API",
+      usePkceWithAuthorizationCodeGrant: true
+    }
+  }
+end
+```
+
+Return `nil` or `{}` from the callable to skip `initOAuth` entirely.
+
+The gem mounts an OAuth redirect helper at `/<mount>/oauth2-redirect.html` (e.g. `/api-docs/oauth2-redirect.html`) — register that URL with your IdP and pass it as `oauth2RedirectUrl` in `ui_config` so Swagger UI uses it.
+
 ## License
 
 MIT
