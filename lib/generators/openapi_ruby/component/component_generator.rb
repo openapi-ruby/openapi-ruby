@@ -11,8 +11,9 @@ module OpenapiRuby
       desc "Generate an OpenAPI schema component class"
 
       def create_component_file
+        component_path = OpenapiRuby.configuration.component_paths.first
         template "component.rb.tt",
-          File.join("app/api_components", component_type, "#{file_name}.rb")
+          File.join(component_path, component_type, "#{file_name}.rb")
       end
 
       private
