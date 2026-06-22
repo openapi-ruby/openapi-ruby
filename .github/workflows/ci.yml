@@ -13,11 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.2", "3.3", "3.4"]
-        rails: ["7.0", "7.1", "7.2", "8.0"]
-        exclude:
-          - ruby: "3.2"
-            rails: "8.0"
+        ruby: ["3.3", "3.4", "4.0"]
+        rails: ["7.2", "8.0"]
 
     name: Ruby ${{ matrix.ruby }} / Rails ${{ matrix.rails }}
 
@@ -43,7 +40,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
+          ruby-version: "4.0"
           bundler-cache: true
 
       - name: Run Standard
