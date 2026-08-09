@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.2](https://github.com/openapi-ruby/openapi-ruby/compare/v4.0.1...v4.0.2) (2026-08-09)
+
+
+### Bug Fixes
+
+* **generator:** suppress test-framework autorun during schema generation ([#45](https://github.com/openapi-ruby/openapi-ruby/issues/45)) ([6ffb6a8](https://github.com/openapi-ruby/openapi-ruby/commit/6ffb6a870a50a05d053d5e9457942817357e217f))
+
 ## [4.0.1](https://github.com/openapi-ruby/openapi-ruby/compare/v4.0.0...v4.0.1) (2026-06-15)
 
 
