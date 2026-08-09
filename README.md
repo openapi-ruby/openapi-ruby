@@ -469,13 +469,41 @@ rake openapi_ruby:generate
 
 This loads spec/test files to collect API definitions and writes schemas without running any tests. It auto-detects the test framework, or you can set `FRAMEWORK=rspec`, `FRAMEWORK=minitest`, or `FRAMEWORK=hybrid`. Custom patterns: `PATTERN="packs/*/spec/**/*_spec.rb"`.
 
+Loading a test file normally *is* enough to run it: `rails/test_help` requires `active_support/testing/autorun`, and `rspec/autorun` does the equivalent — both register an `at_exit` hook that runs the suite. The generated script therefore installs `OpenapiRuby::Generator::AutorunSuppressor` before requiring anything of yours, so the hook is never registered. Generation stays a load-only operation no matter how your helpers are wired.
+
 Schemas are **only** written by the rake task — running tests (`bundle exec rspec`, `rails test`) does not generate or overwrite schema files. This prevents partial schema overwrites when running a subset of specs.
+
+### Making generation cheaper (optional)
+
+Generation only needs your `path` / `api_path` declarations to register. Everything else a test helper does — connecting to a database, loading fixtures, `maintain_test_schema!` — is dead weight, and on a large suite it dominates the runtime.
+
+Guard that setup with `OpenapiRuby.schema_generating?`, which returns `true` only in the rake task's subprocess (it sets `OPENAPI_RUBY_GENERATING=true`):
+
+```ruby
+# test/test_helper.rb
+require "minitest/rails" # keep the spec DSL if your api_path classes use describe/it/let
+
+return if OpenapiRuby.schema_generating?
+
+require "rails/test_help"
+# ...other test-time setup...
+```
+
+This is an optimization, not a correctness requirement — the suppressor handles the autorun hook either way.
+
+One caveat if you do guard: skipping `rails/test_help` also means `fixtures` is undefined, so any test file calling `fixtures :all` in its class body fails to *load*. Point `PATTERN` at just the files carrying `api_path` declarations:
+
+```bash
+PATTERN="test/integration/api/**/*_test.rb" rake openapi_ruby:generate
+```
+
+Suites using FactoryBot rather than fixtures don't hit this.
 
 ### Migrating from RSpec to Minitest (or vice versa)
 
 When both `spec/spec_helper.rb` and `test/test_helper.rb` are present, the rake task auto-selects `FRAMEWORK=hybrid` — it requires both adapters and loads both glob patterns (`spec/**/*_spec.rb,test/**/*_test.rb`) into one process. Style 1 `path(...)` and Style 2 `api_path(...)` definitions register into the same `MetadataStore`, so a single schema file holds paths contributed by either DSL.
 
-Two things to set up on the consumer side so the two test frameworks don't both wire themselves into Rails' lazy-load hooks during schema generation:
+Here the guards described above stop being optional: without them both test frameworks wire themselves into Rails' lazy-load hooks in the same process.
 
 ```ruby
 # test/test_helper.rb
@@ -495,7 +523,7 @@ end
 
 `OpenapiRuby.schema_generating?` returns `true` when the rake task launched the current process (it sets `OPENAPI_RUBY_GENERATING=true` in the subprocess). With the guards in place, neither test framework boots its full Rails integration during generation — only the DSL needs to be live for `api_path` / `path` to register.
 
-The guards are only needed while both frameworks are live. Once the migration completes and only one test framework remains, the rake task auto-detects that framework and the guard becomes dead code that can be removed.
+Once the migration completes and only one test framework remains, the rake task auto-detects that framework. The guard is then no longer *required* — but it's still worth keeping for the reasons in "Making generation cheaper" above.
 
 ## Runtime Middleware
 

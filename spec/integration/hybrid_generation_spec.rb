@@ -108,6 +108,27 @@ RSpec.describe OpenapiRuby::Generator::RakeTaskSupport do
     end
   end
 
+  describe "autorun suppression" do
+    %w[rspec minitest hybrid].each do |framework|
+      context "for #{framework}" do
+        let(:script) do
+          described_class.generate_script(framework, described_class.default_pattern_for(framework))
+        end
+
+        it "installs the suppressor" do
+          expect(script).to include("OpenapiRuby::Generator::AutorunSuppressor.install!")
+        end
+
+        it "installs it before any consumer file is required" do
+          install_at = script.index("AutorunSuppressor.install!")
+          first_load = script.index("Dir.glob") || script.index("load_with_path.call")
+
+          expect(install_at).to be < first_load
+        end
+      end
+    end
+  end
+
   describe "DSL registration across both styles" do
     before do
       OpenapiRuby::DSL::MetadataStore.clear!

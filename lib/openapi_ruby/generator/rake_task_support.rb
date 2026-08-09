@@ -42,9 +42,19 @@ module OpenapiRuby
         end
       end
 
+      # Prepended to every generated script. Loading the consumer's test files
+      # must not run them — see AutorunSuppressor.
+      def suppress_autorun
+        <<~RUBY.chomp
+          require "openapi_ruby/generator/autorun_suppressor"
+          OpenapiRuby::Generator::AutorunSuppressor.install!
+        RUBY
+      end
+
       def rspec_script(pattern)
         <<~RUBY
           require "rspec/core"
+          #{suppress_autorun}
           $LOAD_PATH.unshift(File.expand_path("spec")) unless $LOAD_PATH.include?(File.expand_path("spec"))
           #{glob_loads(pattern)}
           OpenapiRuby::Generator::SchemaWriter.generate_all!
@@ -54,6 +64,7 @@ module OpenapiRuby
       def minitest_script(pattern)
         <<~RUBY
           require "openapi_ruby/minitest"
+          #{suppress_autorun}
           $LOAD_PATH.unshift(File.expand_path("test")) unless $LOAD_PATH.include?(File.expand_path("test"))
           #{glob_loads(pattern)}
           OpenapiRuby::Generator::SchemaWriter.generate_all!
@@ -86,6 +97,7 @@ module OpenapiRuby
           require "rspec/core"
           require "openapi_ruby/rspec"
           require "openapi_ruby/minitest"
+          #{suppress_autorun}
 
           load_with_path = lambda do |dir, glob|
             path = File.expand_path(dir)
