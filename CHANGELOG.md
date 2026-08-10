@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.3](https://github.com/openapi-ruby/openapi-ruby/compare/v4.0.2...v4.0.3) (2026-08-10)
+
+
+### Bug Fixes
+
+* **generator:** don't require a database to generate a schema ([#47](https://github.com/openapi-ruby/openapi-ruby/issues/47)) ([33ab30b](https://github.com/openapi-ruby/openapi-ruby/commit/33ab30b81861947de5cd6e041171c840a592b367))
+
 ## [4.0.2](https://github.com/openapi-ruby/openapi-ruby/compare/v4.0.1...v4.0.2) (2026-08-09)
 
 
