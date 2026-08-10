@@ -20,10 +20,10 @@ RSpec.describe "one api_path per class" do
     OpenapiRuby.configuration.single_api_path_per_class = previous
   end
 
-  context "when enforcement is off (the 4.x default)" do
+  context "when enforcement is off (the default)" do
     before { OpenapiRuby.configuration.single_api_path_per_class = false }
 
-    it "allows a second api_path so existing suites keep working" do
+    it "allows a second api_path" do
       klass = build_class
 
       expect {
@@ -34,13 +34,13 @@ RSpec.describe "one api_path per class" do
       expect(klass._openapi_contexts.size).to eq(2)
     end
 
-    it "warns that it will raise in 5.0" do
+    it "says nothing about it, since resolution handles more than one path" do
       klass = build_class
       klass.api_path("/timers") { get("List") { response(200, "ok") } }
 
       expect {
         klass.api_path("/timers/{id}") { get("Show") { response(200, "ok") } }
-      }.to output(/DEPRECATION.*5\.0/m).to_stderr
+      }.not_to output.to_stderr
     end
   end
 

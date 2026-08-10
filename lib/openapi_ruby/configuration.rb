@@ -19,9 +19,9 @@ module OpenapiRuby
     attr_accessor :request_validation, :response_validation, :coerce_params
 
     # Style 2 only: require each test class to declare a single api_path.
-    # Off in 4.x so existing suites keep working; the default becomes true in
-    # 5.0. While it is off, declaring a second path emits a deprecation
-    # warning. See Adapters::ContextResolution for why the convention exists.
+    # Off by default — resolution handles more than one path per class, so this
+    # is for suites that want the convention enforced anyway.
+    # See Adapters::ContextResolution for how a request is matched.
     attr_accessor :single_api_path_per_class
 
     # Test DSL: validate that requests match the declared operation before sending.

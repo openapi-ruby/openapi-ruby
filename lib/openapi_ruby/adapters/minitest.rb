@@ -31,18 +31,14 @@ module OpenapiRuby
           end
 
           private def guard_single_api_path!(template)
+            return unless OpenapiRuby.configuration.single_api_path_per_class
+
             existing = _openapi_contexts.first
             return if existing.nil?
 
-            message = "#{name || self} already declares api_path #{existing.path_template.inspect}; " \
-              "declare #{template.inspect} in its own class. Requests are matched back to a " \
-              "declaration on the verb and whether path params were given, which cannot always " \
-              "tell sibling paths apart."
-
-            raise OpenapiRuby::MultipleApiPaths, message if OpenapiRuby.configuration.single_api_path_per_class
-
-            warn "[openapi_ruby] DEPRECATION: #{message} This will raise in 5.0; " \
-              "set config.single_api_path_per_class = true to enforce it now."
+            raise OpenapiRuby::MultipleApiPaths,
+              "#{name || self} already declares api_path #{existing.path_template.inspect}; " \
+              "declare #{template.inspect} in its own class."
           end
         end
 
