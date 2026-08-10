@@ -46,8 +46,9 @@ module OpenapiRuby
           end
         end
 
-        def assert_api_response(method, expected_status, params: {}, headers: {}, body: nil, path_params: {}, &block)
-          context = find_context_for(method, path_params)
+        def assert_api_response(method, expected_status, params: {}, headers: {}, body: nil, path_params: {},
+          api_path: nil, &block)
+          context = find_context_for(method, path_params, params, expected_status, api_path)
           raise OpenapiRuby::Error, "No api_path defined for #{method.upcase} in #{self.class}" unless context
 
           operation = context.operations[method.to_s]
@@ -141,9 +142,10 @@ module OpenapiRuby
 
         private
 
-        def find_context_for(method, path_params)
+        def find_context_for(method, path_params, params, expected_status, api_path)
           OpenapiRuby::Adapters::ContextResolution.resolve(
-            self.class._openapi_contexts, method, path_params, owner: self.class
+            self.class._openapi_contexts, method, path_params,
+            params: params, expected_status: expected_status, api_path: api_path, owner: self.class
           )
         end
 

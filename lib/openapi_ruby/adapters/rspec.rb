@@ -127,9 +127,10 @@ module OpenapiRuby
         # Minitest-style assertion: looks up the api_path context, makes the
         # request, validates the response status + body, then yields to the
         # block for additional expectations.
-        def assert_api_response(method, expected_status, params: {}, headers: {}, body: nil, path_params: {}, &block)
+        def assert_api_response(method, expected_status, params: {}, headers: {}, body: nil, path_params: {},
+          api_path: nil, &block)
           meta = ::RSpec.current_example.metadata
-          context = find_api_context_for(meta, method, path_params)
+          context = find_api_context_for(meta, method, path_params, params, expected_status, api_path)
           raise OpenapiRuby::Error, "No api_path defined for #{method.upcase} in this example group" unless context
 
           operation = context.operations[method.to_s]
@@ -338,11 +339,13 @@ module OpenapiRuby
 
         private
 
-        def find_api_context_for(metadata, method, path_params)
+        def find_api_context_for(metadata, method, path_params, params, expected_status, api_path)
           contexts = find_in_metadata(metadata, :openapi_api_contexts) || []
 
           OpenapiRuby::Adapters::ContextResolution.resolve(
-            contexts, method, path_params, owner: metadata[:full_description] || "this example group"
+            contexts, method, path_params,
+            params: params, expected_status: expected_status, api_path: api_path,
+            owner: metadata[:full_description] || "this example group"
           )
         end
 
