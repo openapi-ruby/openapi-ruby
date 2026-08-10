@@ -507,6 +507,36 @@ PATTERN="test/integration/api/**/*_test.rb" rake openapi_ruby:generate
 
 Suites using FactoryBot rather than fixtures don't hit this.
 
+### One api_path per class (Style 2)
+
+Style 2 separates the `api_path` declaration from the request that exercises
+it, so `assert_api_response` has to match the request back to a declaration.
+It does that on the verb and on whether path params were supplied — enough for
+one resource per class (a collection path plus a member path), and not enough
+beyond it.
+
+These three all match "PUT with a path param":
+
+```ruby
+api_path "/timers/{id}"       { put("Update") { ... } }
+api_path "/timers/{id}/start" { put("Start")  { ... } }
+api_path "/timers/{id}/stop"  { put("Stop")   { ... } }
+```
+
+Declare each in its own class. A request that matches more than one raises
+`OpenapiRuby::AmbiguousApiPath` naming the candidates, rather than silently
+picking the first and validating against the wrong response schema.
+
+To adopt the convention wholesale, switch on:
+
+```ruby
+config.single_api_path_per_class = true
+```
+
+`api_path` then raises `OpenapiRuby::MultipleApiPaths` as soon as a class
+declares a second path. It is off in 4.x, where a second declaration warns
+instead, and becomes the default in 5.0.
+
 ### Migrating from RSpec to Minitest (or vice versa)
 
 When both `spec/spec_helper.rb` and `test/test_helper.rb` are present, the rake task auto-selects `FRAMEWORK=hybrid` — it requires both adapters and loads both glob patterns (`spec/**/*_spec.rb,test/**/*_test.rb`) into one process. Style 1 `path(...)` and Style 2 `api_path(...)` definitions register into the same `MetadataStore`, so a single schema file holds paths contributed by either DSL.

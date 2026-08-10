@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "openapi_ruby"
+require_relative "context_resolution"
 require "cgi"
 require "uri"
 
@@ -336,17 +337,10 @@ module OpenapiRuby
 
         def find_api_context_for(metadata, method, path_params)
           contexts = find_in_metadata(metadata, :openapi_api_contexts) || []
-          has_path_params = path_params.any?
 
-          contexts.find do |ctx|
-            next false unless ctx.operations.key?(method.to_s)
-
-            if has_path_params
-              ctx.path_template.include?("{")
-            else
-              !ctx.path_template.include?("{")
-            end
-          end
+          OpenapiRuby::Adapters::ContextResolution.resolve(
+            contexts, method, path_params, owner: metadata[:full_description] || "this example group"
+          )
         end
 
         def expand_path(template, params)

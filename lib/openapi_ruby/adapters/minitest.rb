@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "openapi_ruby"
+require_relative "context_resolution"
 require "cgi"
 require "uri"
 
@@ -20,11 +21,28 @@ module OpenapiRuby
           end
 
           def api_path(template, &block)
+            guard_single_api_path!(template)
+
             context = OpenapiRuby::DSL::Context.new(template, schema_name: _openapi_schema_name)
             context.instance_eval(&block) if block
             self._openapi_contexts = _openapi_contexts + [context]
             OpenapiRuby::DSL::MetadataStore.register(context)
             context
+          end
+
+          private def guard_single_api_path!(template)
+            existing = _openapi_contexts.first
+            return if existing.nil?
+
+            message = "#{name || self} already declares api_path #{existing.path_template.inspect}; " \
+              "declare #{template.inspect} in its own class. Requests are matched back to a " \
+              "declaration on the verb and whether path params were given, which cannot always " \
+              "tell sibling paths apart."
+
+            raise OpenapiRuby::MultipleApiPaths, message if OpenapiRuby.configuration.single_api_path_per_class
+
+            warn "[openapi_ruby] DEPRECATION: #{message} This will raise in 5.0; " \
+              "set config.single_api_path_per_class = true to enforce it now."
           end
         end
 
@@ -124,17 +142,9 @@ module OpenapiRuby
         private
 
         def find_context_for(method, path_params)
-          has_path_params = path_params.any?
-
-          self.class._openapi_contexts.find do |ctx|
-            next false unless ctx.operations.key?(method.to_s)
-
-            if has_path_params
-              ctx.path_template.include?("{")
-            else
-              !ctx.path_template.include?("{")
-            end
-          end
+          OpenapiRuby::Adapters::ContextResolution.resolve(
+            self.class._openapi_contexts, method, path_params, owner: self.class
+          )
         end
 
         def expand_path(template, params)
