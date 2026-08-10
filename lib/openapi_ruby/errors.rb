@@ -14,6 +14,13 @@ module OpenapiRuby
     end
   end
 
+  # Raised when a Style 2 request matches more than one declared api_path.
+  class AmbiguousApiPath < Error; end
+
+  # Raised when a class declares a second api_path and
+  # `config.single_api_path_per_class` is on.
+  class MultipleApiPaths < Error; end
+
   class SchemaValidationError < Error
     attr_reader :validation_errors
 

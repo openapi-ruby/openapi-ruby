@@ -18,6 +18,12 @@ module OpenapiRuby
     # Middleware (runtime validation)
     attr_accessor :request_validation, :response_validation, :coerce_params
 
+    # Style 2 only: require each test class to declare a single api_path.
+    # Off by default — resolution handles more than one path per class, so this
+    # is for suites that want the convention enforced anyway.
+    # See Adapters::ContextResolution for how a request is matched.
+    attr_accessor :single_api_path_per_class
+
     # Test DSL: validate that requests match the declared operation before sending.
     # Enabled by default; set to false to disable.
     attr_accessor :test_request_validation
@@ -51,6 +57,7 @@ module OpenapiRuby
       @response_validation = :disabled
       @coerce_params = true
       @test_request_validation = true
+      @single_api_path_per_class = false
       @schema_output_dir = "openapi"
       @schema_output_format = :yaml
       @ui_enabled = false

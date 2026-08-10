@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "openapi_ruby"
+require_relative "context_resolution"
 require "cgi"
 require "uri"
 
@@ -20,16 +21,30 @@ module OpenapiRuby
           end
 
           def api_path(template, &block)
+            guard_single_api_path!(template)
+
             context = OpenapiRuby::DSL::Context.new(template, schema_name: _openapi_schema_name)
             context.instance_eval(&block) if block
             self._openapi_contexts = _openapi_contexts + [context]
             OpenapiRuby::DSL::MetadataStore.register(context)
             context
           end
+
+          private def guard_single_api_path!(template)
+            return unless OpenapiRuby.configuration.single_api_path_per_class
+
+            existing = _openapi_contexts.first
+            return if existing.nil?
+
+            raise OpenapiRuby::MultipleApiPaths,
+              "#{name || self} already declares api_path #{existing.path_template.inspect}; " \
+              "declare #{template.inspect} in its own class."
+          end
         end
 
-        def assert_api_response(method, expected_status, params: {}, headers: {}, body: nil, path_params: {}, &block)
-          context = find_context_for(method, path_params)
+        def assert_api_response(method, expected_status, params: {}, headers: {}, body: nil, path_params: {},
+          api_path: nil, &block)
+          context = find_context_for(method, path_params, params, expected_status, api_path)
           raise OpenapiRuby::Error, "No api_path defined for #{method.upcase} in #{self.class}" unless context
 
           operation = context.operations[method.to_s]
@@ -123,18 +138,11 @@ module OpenapiRuby
 
         private
 
-        def find_context_for(method, path_params)
-          has_path_params = path_params.any?
-
-          self.class._openapi_contexts.find do |ctx|
-            next false unless ctx.operations.key?(method.to_s)
-
-            if has_path_params
-              ctx.path_template.include?("{")
-            else
-              !ctx.path_template.include?("{")
-            end
-          end
+        def find_context_for(method, path_params, params, expected_status, api_path)
+          OpenapiRuby::Adapters::ContextResolution.resolve(
+            self.class._openapi_contexts, method, path_params,
+            params: params, expected_status: expected_status, api_path: api_path, owner: self.class
+          )
         end
 
         def expand_path(template, params)
