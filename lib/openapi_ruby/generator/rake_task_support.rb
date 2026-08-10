@@ -42,12 +42,15 @@ module OpenapiRuby
         end
       end
 
-      # Prepended to every generated script. Loading the consumer's test files
-      # must not run them — see AutorunSuppressor.
+      # Prepended to every generated script, before any consumer file is
+      # required. Loading the consumer's test files must neither run them
+      # (AutorunSuppressor) nor drag in a database (TestSchemaSuppressor).
       def suppress_autorun
         <<~RUBY.chomp
           require "openapi_ruby/generator/autorun_suppressor"
+          require "openapi_ruby/generator/test_schema_suppressor"
           OpenapiRuby::Generator::AutorunSuppressor.install!
+          OpenapiRuby::Generator::TestSchemaSuppressor.install!
         RUBY
       end
 
