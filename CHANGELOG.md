@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/openapi-ruby/openapi-ruby/compare/v4.0.3...v4.1.0) (2026-08-10)
+
+
+### Features
+
+* **adapters:** raise on ambiguous api_path instead of guessing ([#49](https://github.com/openapi-ruby/openapi-ruby/issues/49)) ([6a3a556](https://github.com/openapi-ruby/openapi-ruby/commit/6a3a556bdc83a8e7f2d5bdb956fb40dffec00783))
+
 ## [4.0.3](https://github.com/openapi-ruby/openapi-ruby/compare/v4.0.2...v4.0.3) (2026-08-10)
 
 
