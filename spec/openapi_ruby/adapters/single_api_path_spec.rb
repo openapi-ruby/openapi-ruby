@@ -7,6 +7,7 @@ RSpec.describe "one api_path per class" do
   def build_class
     Class.new(::Minitest::Test) do
       include OpenapiRuby::Adapters::Minitest::DSL
+
       openapi_schema :test
 
       def self.name = "TimersTest"
