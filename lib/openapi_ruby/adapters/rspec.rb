@@ -22,8 +22,11 @@ module OpenapiRuby
           schema_name = metadata[:openapi_schema_name]
           context = DSL::Context.new(template, schema_name: schema_name)
           context.instance_eval(&block) if block
-          metadata[:openapi_api_contexts] ||= []
-          metadata[:openapi_api_contexts] << context
+          # Replace rather than push: RSpec copies parent metadata into child
+          # groups by reference, so mutating the array in place would leak this
+          # declaration back up to the parent and sideways to its siblings.
+          # Building a new one is what makes a nested describe an actual scope.
+          metadata[:openapi_api_contexts] = (metadata[:openapi_api_contexts] || []) + [context]
           DSL::MetadataStore.register(context)
           context
         end
