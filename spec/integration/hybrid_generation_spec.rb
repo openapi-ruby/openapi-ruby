@@ -125,6 +125,14 @@ RSpec.describe OpenapiRuby::Generator::RakeTaskSupport do
 
           expect(install_at).to be < first_load
         end
+
+        it "also suppresses test-schema maintenance, before any consumer file" do
+          install_at = script.index("TestSchemaSuppressor.install!")
+          first_load = script.index("Dir.glob") || script.index("load_with_path.call")
+
+          expect(install_at).not_to be_nil
+          expect(install_at).to be < first_load
+        end
       end
     end
   end

@@ -473,9 +473,17 @@ Loading a test file normally *is* enough to run it: `rails/test_help` requires `
 
 Schemas are **only** written by the rake task — running tests (`bundle exec rspec`, `rails test`) does not generate or overwrite schema files. This prevents partial schema overwrites when running a subset of specs.
 
+### No database required
+
+The document is built from your declarations, never from the database — but `rails/test_help` verifies the test schema at require time (`maintain_test_schema!`), and many hand-written helpers add `ActiveRecord::Migration.check_all_pending!`. Both open a connection, which would make a database a hard requirement for generating a document that doesn't need one.
+
+Generation stubs both out, so `rake openapi_ruby:generate` runs with no database available. Nothing else about your helper changes, and the stubs exist only inside the generation subprocess — normal test runs still verify the schema as usual.
+
+Only the schema *check* is skipped. A connection is still available if your declarations genuinely need one (an enum built from a query at load time, say); such a suite needs a database either way.
+
 ### Making generation cheaper (optional)
 
-Generation only needs your `path` / `api_path` declarations to register. Everything else a test helper does — connecting to a database, loading fixtures, `maintain_test_schema!` — is dead weight, and on a large suite it dominates the runtime.
+Generation only needs your `path` / `api_path` declarations to register. Booting the full test framework and loading fixtures is dead weight, and on a large suite it dominates the runtime.
 
 Guard that setup with `OpenapiRuby.schema_generating?`, which returns `true` only in the rake task's subprocess (it sets `OPENAPI_RUBY_GENERATING=true`):
 
@@ -489,7 +497,7 @@ require "rails/test_help"
 # ...other test-time setup...
 ```
 
-This is an optimization, not a correctness requirement — the suppressor handles the autorun hook either way.
+This is purely an optimization — generation is already correct and database-free without it.
 
 One caveat if you do guard: skipping `rails/test_help` also means `fixtures` is undefined, so any test file calling `fixtures :all` in its class body fails to *load*. Point `PATTERN` at just the files carrying `api_path` declarations:
 
