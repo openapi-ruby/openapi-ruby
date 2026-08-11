@@ -42,6 +42,10 @@ RSpec.describe OpenapiRuby::Configuration do
       expect(config.ui_enabled).to be false
     end
 
+    it "sets oauth_config to nil" do
+      expect(config.oauth_config).to be_nil
+    end
+
     it "defaults strict_reference_validation to :warn_only" do
       expect(config.strict_reference_validation).to eq(:warn_only)
     end

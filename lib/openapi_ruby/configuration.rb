@@ -48,6 +48,12 @@ module OpenapiRuby
     # UI (optional)
     attr_accessor :ui_enabled, :ui_config
 
+    # OAuth (optional) — accepts a Hash or a callable. A callable receives the
+    # Swagger UI controller instance at request time and must return a Hash of
+    # initOAuth options. Use a callable to avoid touching the database during
+    # Rails boot.
+    attr_accessor :oauth_config
+
     def initialize
       @schemas = {}
       @component_paths = ["app/api_components"]
@@ -62,6 +68,7 @@ module OpenapiRuby
       @schema_output_format = :yaml
       @ui_enabled = false
       @ui_config = {}
+      @oauth_config = nil
       @strict_reference_validation = :warn_only
       @auto_validation_error_response = true
       @validation_error_schema = nil
