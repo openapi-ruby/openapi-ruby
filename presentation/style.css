@@ -1,0 +1,77 @@
+/* ------- LCARS theme (Star Trek: Strange New Worlds palette) -------
+   Global styles, auto-loaded by Slidev. Fonts: Barlow + JetBrains Mono come
+   via the `fonts:` frontmatter; Antonio (headings) is imported here. */
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@400;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --bg:#0a0e17; --gold:#e9a94d; --coral:#e4594c; --teal:#3bb5ae;
+  --cream:#ead9b0; --steel:#5e8fc0; --body:#ede6d6; --panel:#0d131e;
+}
+
+.slidev-layout {
+  background:
+    radial-gradient(ellipse 1000px 680px at 60% 46%, rgba(233,169,77,0.13), rgba(228,89,76,0.05) 42%, transparent 72%),
+    linear-gradient(rgba(94,143,192,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94,143,192,0.045) 1px, transparent 1px),
+    var(--bg);
+  background-size: auto, 100% 72px, 72px 100%, auto;
+  color: var(--body);
+  font-family: 'Barlow', sans-serif;
+  padding: 150px 56px 80px 176px;
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* --- persistent LCARS frame --- */
+.lcars-frame { position:absolute; inset:0; pointer-events:none; z-index:0; }
+.lcars-frame .elbow { position:absolute; left:24px; top:24px; width:300px; height:104px; background:var(--gold); border-radius:80px 0 0 0; }
+.lcars-frame .rail  { position:absolute; left:24px; top:136px; bottom:64px; width:120px; display:flex; flex-direction:column; gap:8px; }
+.lcars-frame .rail > i { display:block; }
+.lcars-frame .rail > i:nth-child(1){ flex:2.4; background:var(--gold); }
+.lcars-frame .rail > i:nth-child(2){ flex:1.1; background:var(--coral); }
+.lcars-frame .rail > i:nth-child(3){ flex:1.7; background:var(--teal); }
+.lcars-frame .rail > i:nth-child(4){ flex:0.8; background:var(--cream); }
+.lcars-frame .rail > i:nth-child(5){ flex:2.0; background:var(--steel); }
+.lcars-frame .rail > i:nth-child(6){ flex:0.9; background:var(--gold); }
+.lcars-frame .rail > i:nth-child(7){ flex:1.3; background:var(--coral); border-radius:0 0 0 60px; }
+.lcars-frame .topbar { position:absolute; left:332px; right:24px; top:24px; height:56px; display:flex; gap:8px; }
+.lcars-frame .topbar .tag { background:var(--gold); color:var(--bg); font-family:'Antonio',sans-serif; font-weight:700; font-size:26px; letter-spacing:4px; display:flex; align-items:center; padding:0 26px; border-radius:0 28px 28px 0; }
+.lcars-frame .topbar .s1 { width:40px; background:var(--teal); border-radius:6px; }
+.lcars-frame .topbar .fill { flex:1; background:#141b28; border-radius:6px; }
+.lcars-frame .topbar .s2 { width:26px; background:var(--coral); border-radius:6px; }
+.lcars-frame .topbar .readout { min-width:280px; background:#141b28; border-radius:6px 28px 28px 6px; display:flex; align-items:center; justify-content:flex-end; padding:0 28px; color:var(--gold); font-family:'JetBrains Mono',monospace; font-size:19px; letter-spacing:2px; }
+.lcars-frame .botbar { position:absolute; left:152px; right:24px; bottom:24px; height:26px; display:flex; gap:8px; }
+.lcars-frame .botbar .b1 { width:60px; background:var(--steel); border-radius:6px 0 0 6px; }
+.lcars-frame .botbar .lab { background:#141b28; border-radius:6px; display:flex; align-items:center; padding:0 20px; color:var(--steel); font-family:'JetBrains Mono',monospace; font-size:14px; letter-spacing:3px; }
+.lcars-frame .botbar .fill { flex:1; background:#141b28; border-radius:6px; }
+.lcars-frame .botbar .b2 { width:120px; background:var(--gold); border-radius:6px; }
+.lcars-frame .botbar .b3 { width:34px; background:var(--teal); border-radius:0 6px 6px 0; }
+
+/* content sits above frame */
+.lcars-frame ~ * { position:relative; z-index:1; }
+
+/* typography helpers */
+.eyebrow { font-family:'JetBrains Mono',monospace; font-size:24px; letter-spacing:5px; text-transform:uppercase; color:var(--coral); margin-bottom:20px; }
+h1.lc { font-family:'Antonio',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--gold); line-height:1.02 !important; margin:0; display:block; }
+.title { font-size:72px; }
+.hl { font-size:88px; }
+.sub { font-size:40px; color:var(--body); }
+.cap { font-size:30px; }
+.small { font-size:24px; }
+.teal{color:var(--teal);} .coral{color:var(--coral);} .cream{color:var(--cream);} .steel{color:var(--steel);} .gold{color:var(--gold);}
+
+/* code panels: coral left rail, dark bg */
+.slidev-layout pre, .slidev-layout .shiki {
+  background: var(--panel) !important;
+  border:1px solid rgba(94,143,192,0.16);
+  border-left:5px solid var(--coral);
+  border-radius:10px; padding:28px 32px !important;
+  font-size:26px; line-height:1.6;
+}
+.card { background:var(--panel); border:1px solid rgba(94,143,192,0.18); border-radius:12px; padding:30px 34px; }
+.card.here { background:#140f0a; border-color:var(--gold); }
+
