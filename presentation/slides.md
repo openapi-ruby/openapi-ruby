@@ -31,7 +31,7 @@ mdc: true
 <div class="eyebrow">Ruby Usergroup // Engineering Briefing</div>
 <div style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:140px;line-height:0.92;color:var(--cream);letter-spacing:-2px;">openapi_ruby</div>
 <div class="sub" style="margin-top:34px;max-width:1150px;line-height:1.3;">OpenAPI docs, tests &amp; runtime validation from one source — in Rails.</div>
-<div class="small steel" style="font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-top:44px;">v4.0.1 · MIT · Ruby ≥ 3.2 · Rails ≥ 7</div>
+<div class="small steel" style="font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-top:44px;">v4.1.0 · MIT · Ruby ≥ 3.2 · Rails ≥ 7</div>
 
 <!--
 Hook. Quick show of hands — who here has an API where the docs and the real API have quietly drifted apart? Yeah. That's the whole talk. This is openapi_ruby: one source of truth for your docs, your tests, and runtime validation, built for Rails.
@@ -365,6 +365,8 @@ end
 
 <!--
 There are two ways to write the same thing. Style one interleaves the request into the block, run_test! and all — very RSpec. Style two declares the schema up top with api_path, then a plain separate test asserts the response. Style two is the Minitest DSL — it's first-class here, not bolted on. RSpec folks can use either; Minitest folks use style two. Same spec out the other end.
+
+If someone asks: a class can declare more than one api_path, and assert_api_response figures out which one you meant from the method and params. As of 4.1.0, if a request genuinely matches two of them it raises AmbiguousApiPath rather than picking one — pass `api_path:` to say which. There's also `config.single_api_path_per_class` if you'd rather just enforce one per class.
 -->
 
 ---
