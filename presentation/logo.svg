@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="gem-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF5350"/>
+      <stop offset="100%" stop-color="#B71C1C"/>
+    </linearGradient>
+    <linearGradient id="facet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8A80" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#E53935" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Ruby gem hexagon -->
+  <polygon
+    points="256,48 432,158 432,354 256,464 80,354 80,158"
+    fill="url(#gem-grad)"
+    filter="url(#shadow)"
+  />
+
+  <!-- Top facet highlight -->
+  <polygon
+    points="256,48 432,158 256,220 80,158"
+    fill="url(#facet)"
+  />
+
+  <!-- Facet lines -->
+  <line x1="256" y1="48" x2="256" y2="464" stroke="#C62828" stroke-width="1.5" opacity="0.35"/>
+  <line x1="80" y1="158" x2="432" y2="354" stroke="#C62828" stroke-width="1.5" opacity="0.25"/>
+  <line x1="432" y1="158" x2="80" y2="354" stroke="#C62828" stroke-width="1.5" opacity="0.25"/>
+
+  <!-- Opening curly brace -->
+  <text
+    x="152" y="262"
+    font-family="'SF Mono', 'Fira Code', 'Consolas', monospace"
+    font-size="120"
+    font-weight="300"
+    fill="#FFFFFF"
+    text-anchor="middle"
+    dominant-baseline="central"
+    opacity="0.9"
+  >{</text>
+
+  <!-- Closing curly brace -->
+  <text
+    x="360" y="262"
+    font-family="'SF Mono', 'Fira Code', 'Consolas', monospace"
+    font-size="120"
+    font-weight="300"
+    fill="#FFFFFF"
+    text-anchor="middle"
+    dominant-baseline="central"
+    opacity="0.9"
+  >}</text>
+
+  <!-- Spec lines (representing OpenAPI paths/schemas) -->
+  <g opacity="0.95">
+    <!-- Line 1: GET /path -->
+    <rect x="210" y="218" width="40" height="8" rx="4" fill="#FF8A80"/>
+    <rect x="258" y="218" width="56" height="8" rx="4" fill="#FFFFFF"/>
+
+    <!-- Line 2: POST /path -->
+    <rect x="210" y="246" width="52" height="8" rx="4" fill="#FFFFFF"/>
+    <rect x="270" y="246" width="32" height="8" rx="4" fill="#FF8A80"/>
+
+    <!-- Line 3: PUT /path -->
+    <rect x="210" y="274" width="30" height="8" rx="4" fill="#FF8A80"/>
+    <rect x="248" y="274" width="64" height="8" rx="4" fill="#FFFFFF"/>
+  </g>
+
+  <!-- "API" label -->
+  <text
+    x="256" y="348"
+    font-family="'Inter', 'Helvetica Neue', 'Arial', sans-serif"
+    font-size="48"
+    font-weight="800"
+    fill="#FFFFFF"
+    text-anchor="middle"
+    dominant-baseline="central"
+    letter-spacing="6"
+    opacity="0.9"
+  >API</text>
+
+  <!-- Three connected dots (endpoints) -->
+  <circle cx="216" cy="392" r="5" fill="#FF8A80" opacity="0.8"/>
+  <circle cx="256" cy="392" r="5" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="296" cy="392" r="5" fill="#FF8A80" opacity="0.8"/>
+  <line x1="221" y1="392" x2="251" y2="392" stroke="#FFCDD2" stroke-width="1.5" opacity="0.6"/>
+  <line x1="261" y1="392" x2="291" y2="392" stroke="#FFCDD2" stroke-width="1.5" opacity="0.6"/>
+</svg>
