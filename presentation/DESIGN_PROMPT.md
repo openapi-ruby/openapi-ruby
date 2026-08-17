@@ -55,7 +55,7 @@ Typography:
 ## Slides (headline → on-slide content → speaker-note gist)
 
 1. **Cover** — logo, big `openapi_ruby`, subtitle "OpenAPI docs, tests & runtime
-   validation from one source — in Rails", meta line `v4.0.1 · MIT · Ruby ≥ 3.2 ·
+   validation from one source — in Rails", meta line `v4.1.0 · MIT · Ruby ≥ 3.2 ·
    Rails ≥ 7`, eyebrow "Ruby Usergroup // Engineering Briefing".
    *Note: hook — "who has an API where the docs and the real API have drifted?"*
 
@@ -64,7 +64,10 @@ Typography:
    *Note: fobizz is edtech, a Rails shop, so this gem is day-job relevant.*
 
 3. **The actual problem** — three tiny code snippets side by side showing drift:
-   the code renders `full_name`; the docs promise `name`; the test checks `"name"`.
+   a serializer that stopped sending `email`; an `openapi.yaml` still listing
+   `email` as required; a request spec that only asserts `have_http_status(:ok)`
+   and never looks at the body. Caption: "All three are green. The docs still
+   promise a field the API stopped sending."
    *Note: one contract written three times, all green, silently disagreeing.*
 
 4. **What is OpenAPI?** — one line "Your API — as a document." + a small YAML
@@ -99,7 +102,9 @@ Typography:
     (`path` / `run_test!`, interleaved) vs Style 2 (`api_path` with schema up top +
     a separate `assert_api_response` test). Eyebrow: "RSpec: either · Minitest:
     style 2 · same output".
-    *Note: same spec either way; Style 2 is the Minitest DSL — first-class, not bolted on.*
+    *Note: same spec either way; Style 2 is the Minitest DSL — first-class, not bolted on.
+    Backup detail for Q&A: a class may declare several `api_path`s; since 4.1.0 an
+    ambiguous match raises `AmbiguousApiPath` instead of guessing.*
 
 11. **Test in, spec out** — left: the test you wrote (Ruby); right: the generated
     OpenAPI (YAML) with `Schemas::User` resolved to a `$ref`. Caption: "Produced by
