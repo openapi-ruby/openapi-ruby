@@ -76,12 +76,19 @@ module OpenapiRuby
 
       # Loads both adapters and both file globs in one process. Useful
       # during a phased RSpec → Minitest migration where the suite
-      # holds both DSL styles. Consumers should guard
+      # holds both DSL styles. Consumers can guard
       # `require "rails/test_help"` and `require "rspec/rails"` in
       # their test helpers with `unless OpenapiRuby.schema_generating?`
       # so the two test frameworks don't both register Rails lazy
       # hooks in the same process — only the DSL needs to be live for
       # schema generation.
+      #
+      # Guarding is per-helper and optional: a suite that references
+      # what the guarded require defines at *load* time (shared
+      # examples, `fixtures :all`, `include Devise::Test::...` in a
+      # class body) fails to load those files at all, which is worse
+      # than the hook conflict. Such a helper stays unguarded and the
+      # pattern narrows instead.
       #
       # Each glob runs with its own framework's directory at the head
       # of $LOAD_PATH so the typical `require "openapi_helper"` /

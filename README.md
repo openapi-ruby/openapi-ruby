@@ -497,15 +497,29 @@ require "rails/test_help"
 # ...other test-time setup...
 ```
 
-This is purely an optimization — generation is already correct and database-free without it.
+This is purely an optimization — generation is already correct and database-free without it. Reach for it only if generation is slow enough to bother you.
 
-One caveat if you do guard: skipping `rails/test_help` also means `fixtures` is undefined, so any test file calling `fixtures :all` in its class body fails to *load*. Point `PATTERN` at just the files carrying `api_path` declarations:
+#### When guarding backfires
 
-```bash
-PATTERN="test/integration/api/**/*_test.rb" rake openapi_ruby:generate
-```
+The guard skips a require, so anything that require defines is gone for the whole generation run. That is fine for setup your files only touch while *running*, and fatal for anything they touch while *loading* — a file that fails to load contributes no declarations, and generation fails outright.
 
-Suites using FactoryBot rather than fixtures don't hit this.
+Loading a spec/test file executes its class body, so these all break under a guard:
+
+- `fixtures :all` — `fixtures` is undefined without `rails/test_help`
+- `include Devise::Test::IntegrationHelpers` — needs `rspec/rails` (or `rails/test_help`) already loaded
+- `it_behaves_like "..."` / `include_examples` at the top level — needs the shared examples your helper loaded
+
+Two ways out, and they compose:
+
+1. **Narrow `PATTERN`** to just the files carrying `path` / `api_path` declarations, so the files with load-time dependencies are never loaded:
+
+   ```bash
+   PATTERN="test/integration/api/**/*_test.rb" rake openapi_ruby:generate
+   ```
+
+2. **Leave that helper unguarded.** A helper whose constants are referenced at load time across the suite is often not worth guarding — you would be trading a working generation run for a faster one. Guarding is optional per helper; guard `test/test_helper.rb` and leave `spec/rails_helper.rb` alone if that is what your suite needs.
+
+Suites using FactoryBot rather than fixtures, and keeping helper includes inside `before` blocks, tend not to hit any of this.
 
 ### How a request finds its api_path (Style 2)
 
@@ -570,7 +584,7 @@ declares a second path. Off by default.
 
 When both `spec/spec_helper.rb` and `test/test_helper.rb` are present, the rake task auto-selects `FRAMEWORK=hybrid` — it requires both adapters and loads both glob patterns (`spec/**/*_spec.rb,test/**/*_test.rb`) into one process. Style 1 `path(...)` and Style 2 `api_path(...)` definitions register into the same `MetadataStore`, so a single schema file holds paths contributed by either DSL.
 
-Here the guards described above stop being optional: without them both test frameworks wire themselves into Rails' lazy-load hooks in the same process.
+Here the guards described above carry more weight: without them both test frameworks wire themselves into Rails' lazy-load hooks in the same process. Guard what you can — but the "When guarding backfires" rules still apply, so a helper your suite leans on at load time stays unguarded even in hybrid mode.
 
 ```ruby
 # test/test_helper.rb
@@ -590,7 +604,7 @@ end
 
 `OpenapiRuby.schema_generating?` returns `true` when the rake task launched the current process (it sets `OPENAPI_RUBY_GENERATING=true` in the subprocess). With the guards in place, neither test framework boots its full Rails integration during generation — only the DSL needs to be live for `api_path` / `path` to register.
 
-Once the migration completes and only one test framework remains, the rake task auto-detects that framework. The guard is then no longer *required* — but it's still worth keeping for the reasons in "Making generation cheaper" above.
+Once the migration completes and only one test framework remains, the rake task auto-detects that framework, and the guard goes back to being a pure optimization.
 
 ## Runtime Middleware
 
