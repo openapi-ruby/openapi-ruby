@@ -9,8 +9,7 @@
     "export": "slidev export slides.md"
   },
   "dependencies": {
-    "@slidev/cli": "^52.18.0",
-    "@slidev/theme-seriph": "^0.25.0"
+    "@slidev/cli": "^52.18.0"
   },
   "devDependencies": {
     "playwright-chromium": "^1.61.1"

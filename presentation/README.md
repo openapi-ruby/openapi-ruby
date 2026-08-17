@@ -32,23 +32,23 @@ pnpm export       # slides.pdf (needs playwright-chromium)
 ## Theme
 
 A self-contained LCARS (Star Trek: Strange New Worlds) theme, tuned to the
-ruby-red logo palette. Everything lives inline in `slides.md` (`theme: none`):
+ruby-red logo palette. No theme package (`theme: none`) — it's all in
+`style.css`, which Slidev auto-loads:
 
-- A single `<style>` block on the first slide defines the palette (`--gold`,
-  `--coral`, `--teal`, `--cream`, `--steel` on a deep navy `--bg`), the
-  `.slidev-layout` background, and the LCARS frame.
+- `style.css` defines the palette (`--gold`, `--coral`, `--teal`, `--cream`,
+  `--steel` on a deep navy `--bg`), the `.slidev-layout` background, and the
+  LCARS frame.
 - The LCARS frame (elbow, side rail, segmented bars) is a small HTML block
   repeated at the top of every slide. The `NCC · SEC nn/nn` readout is **live**
   via `$slidev.nav` (works because `mdc: true`).
 - `canvasWidth: 1920` — px sizes are authored against a 1920×1080 canvas.
 - Fonts: Barlow + JetBrains Mono via the `fonts:` frontmatter; Antonio (headings)
-  via an `@import` in the `<style>` block. **The Antonio `@import` needs network**
-  — for a fully offline export, self-host it or add it to `fonts:`.
+  via an `@import` at the top of `style.css`. **That `@import` needs network** —
+  for a fully offline export, self-host it or add it to `fonts:`.
 
-Tune colors via the `--*` CSS variables in that first `<style>` block.
+Tune colors via the `--*` CSS variables at the top of `style.css`.
 
-> This deck was generated from `DESIGN_PROMPT.md`. The original download is kept
-> under `slidev/` for reference; the runnable deck is this folder's `slides.md`.
+> This deck was generated from `DESIGN_PROMPT.md`.
 
 ## Style: hybrid-minimal
 

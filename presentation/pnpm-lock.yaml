@@ -11,9 +11,6 @@ importers:
       '@slidev/cli':
         specifier: ^52.18.0
         version: 52.18.0(@nuxt/kit@3.21.8)(@types/markdown-it@14.1.2)(@types/node@22.20.1)(@vue/compiler-sfc@3.5.39)(lightningcss@1.32.0)(markdown-it@14.3.0)(playwright-chromium@1.61.1)(postcss@8.5.19)(rolldown@1.1.5)
-      '@slidev/theme-seriph':
-        specifier: ^0.25.0
-        version: 0.25.0
     devDependencies:
       playwright-chromium:
         specifier: ^1.61.1
@@ -885,14 +882,6 @@ packages:
   '@slidev/rough-notation@0.1.0':
     resolution: {integrity: sha512-a/CbVmjuoO3E4JbUr2HOTsXndbcrdLWOM+ajbSQIY3gmLFzhjeXHGksGcp1NZ08pJjLZyTCxfz1C7v/ltJqycA==}
 
-  '@slidev/theme-seriph@0.25.0':
-    resolution: {integrity: sha512-PnFQbn4I70+/cVie5iAr0Im6sYvnwjkO7Yj5KonTyJZFFJFytckLTrD3ijft/J4cRnz7OmSzTyQKNX1FN/x0YQ==}
-    engines: {node: '>=14.0.0', slidev: '>=v0.47.0'}
-
-  '@slidev/types@0.47.5':
-    resolution: {integrity: sha512-X67V4cCgM0Sz50bP8GbVzmiL8DHC2IXvdKcsN7DlxHyf+/T4d9GveeGukwha5Fx3MuYeGZWKag7TFL2ZY4w54A==}
-    engines: {node: '>=18.0.0'}
-
   '@slidev/types@52.18.0':
     resolution: {integrity: sha512-bnLTZFVvURCqVeH0bm+He22Xfvk3CxpKY4QLg6i4TlbWDX0tg6nDzJWcufdbnEueJPoQOQwgax0SNEN8xVqXkw==}
     engines: {node: '>=20.12.0'}
@@ -1441,9 +1430,6 @@ packages:
   clone-regexp@3.0.0:
     resolution: {integrity: sha512-ujdnoq2Kxb8s3ItNBtnYeXdm07FcU0u8ARAT1lQ2YdMwQC+cdiXX8KoqMVuglztILivceTtp4ivqGSmEmhBUJw==}
     engines: {node: '>=12'}
-
-  codemirror-theme-vars@0.1.2:
-    resolution: {integrity: sha512-WTau8X2q58b0SOAY9DO+iQVw8JKVEgyQIqArp2D732tcc+pobbMta3bnVMdQdmgwuvNrOFFr6HoxPRoQOgooFA==}
 
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
@@ -2769,9 +2755,6 @@ packages:
 
   pptxgenjs@4.0.1:
     resolution: {integrity: sha512-TeJISr8wouAuXw4C1F/mC33xbZs/FuEG6nH9FG1Zj+nuPcGMP5YRHl6X+j3HSUnS1f3at6k75ZZXPMZlA5Lj9A==}
-
-  prism-theme-vars@0.2.5:
-    resolution: {integrity: sha512-/D8gBTScYzi9afwE6v3TC1U/1YFZ6k+ly17mtVRdLpGy7E79YjJJWkXFgUDHJ2gDksV/ZnXF7ydJ4TvoDm2z/Q==}
 
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
@@ -4459,14 +4442,6 @@ snapshots:
     dependencies:
       roughjs: 4.6.6
 
-  '@slidev/theme-seriph@0.25.0':
-    dependencies:
-      '@slidev/types': 0.47.5
-      codemirror-theme-vars: 0.1.2
-      prism-theme-vars: 0.2.5
-
-  '@slidev/types@0.47.5': {}
-
   '@slidev/types@52.18.0(@nuxt/kit@3.21.8)(@vue/compiler-sfc@3.5.39)(rolldown@1.1.5)(typescript@6.0.3)(vite@8.1.4(@types/node@22.20.1)(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
       '@antfu/utils': 9.3.0
@@ -5249,8 +5224,6 @@ snapshots:
   clone-regexp@3.0.0:
     dependencies:
       is-regexp: 3.1.0
-
-  codemirror-theme-vars@0.1.2: {}
 
   colorette@2.0.20: {}
 
@@ -6780,8 +6753,6 @@ snapshots:
       https: 1.0.0
       image-size: 1.2.1
       jszip: 3.10.1
-
-  prism-theme-vars@0.2.5: {}
 
   process-nextick-args@2.0.1: {}
 
