@@ -73,6 +73,8 @@ require_relative "openapi_ruby/middleware/schema_resolver"
 require_relative "openapi_ruby/middleware/request_validation"
 require_relative "openapi_ruby/middleware/response_validation"
 require_relative "openapi_ruby/middleware/installer"
+require_relative "openapi_ruby/serving"
+require_relative "openapi_ruby/rack_app"
 require_relative "openapi_ruby/controller_helpers"
 if defined?(Rails::Engine)
   require_relative "openapi_ruby/engine"
