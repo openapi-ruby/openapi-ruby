@@ -12,6 +12,7 @@ require "yaml"
 
 require_relative "openapi_ruby/version"
 require_relative "openapi_ruby/errors"
+require_relative "openapi_ruby/host"
 require_relative "openapi_ruby/configuration"
 
 module OpenapiRuby
