@@ -35,6 +35,33 @@ jobs:
       - name: Run tests
         run: bundle exec rspec
 
+  hanami:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.3", "3.4"]
+        hanami: ["2.3", "3.0"]
+
+    name: Ruby ${{ matrix.ruby }} / Hanami ${{ matrix.hanami }}
+
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/hanami.gemfile
+      HANAMI_VERSION: ${{ matrix.hanami }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      # Rails-free bundle: also proves the gem loads without railties.
+      - name: Run Hanami dummy app specs
+        working-directory: spec/hanami_dummy
+        run: bundle exec rspec
+
   lint:
     runs-on: ubuntu-latest
 

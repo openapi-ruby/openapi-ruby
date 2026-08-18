@@ -1,0 +1,26 @@
+# frozen_string_literal: true
+
+# Rails-free bundle: proves openapi-ruby works on a Hanami host and that the
+# gem loads with no railties present.
+source "https://rubygems.org"
+
+gemspec path: ".."
+
+gem "rake"
+gem "rspec"
+
+group :test do
+  hanami_version = ENV.fetch("HANAMI_VERSION", "3.0")
+
+  gem "hanami", "~> #{hanami_version}.0"
+  gem "hanami-router", "~> #{hanami_version}.0"
+  # Hanami 3 renamed hanami-controller to hanami-action; both provide
+  # `hanami/action`, which is all the dummy app needs.
+  if hanami_version.to_f >= 3.0
+    gem "hanami-action", "~> #{hanami_version}.0"
+  else
+    gem "hanami-controller", "~> #{hanami_version}.0"
+  end
+
+  gem "rack-test"
+end
