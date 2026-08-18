@@ -111,18 +111,18 @@ module OpenapiRuby
             assert req_errors.empty?, "Request validation failed:\n#{req_errors.join("\n")}"
           end
 
-          send(method, path, **request_args)
+          openapi_transport.dispatch(method, path, **request_args)
 
           # Validate response
-          assert_equal expected_status, response.status,
-            "Expected status #{expected_status}, got #{response.status}\nResponse body: #{response.body}"
+          assert_equal expected_status, openapi_response.status,
+            "Expected status #{expected_status}, got #{openapi_response.status}\nResponse body: #{openapi_response.body}"
 
           if response_ctx.schema_definition
             validator = Testing::ResponseValidator.new
             body_data = parse_response_body
             errors = validator.validate(
               response_body: body_data,
-              status_code: response.status,
+              status_code: openapi_response.status,
               response_context: response_ctx
             )
             assert errors.empty?, "Response validation failed:\n#{errors.join("\n")}"
@@ -134,6 +134,17 @@ module OpenapiRuby
 
         def parsed_body
           parse_response_body
+        end
+
+        # The seam between the DSL and the host's request API. Public so specs
+        # that drive requests themselves (rate limiting, pagination loops) can
+        # reach the same dispatcher and response the assertions use.
+        def openapi_transport
+          @openapi_transport ||= Testing::Transport.for(self)
+        end
+
+        def openapi_response
+          openapi_transport.response
         end
 
         private
@@ -222,11 +233,11 @@ module OpenapiRuby
         end
 
         def parse_response_body
-          return nil if response.body.empty?
+          return nil if openapi_response.body.empty?
 
-          JSON.parse(response.body)
+          JSON.parse(openapi_response.body)
         rescue JSON::ParserError
-          response.body
+          openapi_response.body
         end
       end
 

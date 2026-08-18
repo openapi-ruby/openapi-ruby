@@ -192,10 +192,10 @@ module OpenapiRuby
             raise "Request validation failed:\n#{req_errors.join("\n")}" unless req_errors.empty?
           end
 
-          send(method, path, **request_args)
+          openapi_transport.dispatch(method, path, **request_args)
 
-          unless response.status == expected_status
-            raise "Expected status #{expected_status}, got #{response.status}\nResponse body: #{response.body}"
+          unless openapi_response.status == expected_status
+            raise "Expected status #{expected_status}, got #{openapi_response.status}\nResponse body: #{openapi_response.body}"
           end
 
           if response_ctx.schema_definition
@@ -204,11 +204,11 @@ module OpenapiRuby
             )
             errors = validator.validate(
               response_body: parsed_response_body,
-              status_code: response.status,
+              status_code: openapi_response.status,
               response_context: response_ctx
             )
             unless errors.empty?
-              raise "Response body validation failed:\n#{errors.join("\n")}\nResponse body: #{response.body}"
+              raise "Response body validation failed:\n#{errors.join("\n")}\nResponse body: #{openapi_response.body}"
             end
           end
 
@@ -217,6 +217,17 @@ module OpenapiRuby
 
         def parsed_body
           parsed_response_body
+        end
+
+        # The seam between the DSL and the host's request API. Public so specs
+        # that drive requests themselves (rate limiting, pagination loops) can
+        # reach the same dispatcher and response the assertions use.
+        def openapi_transport
+          @openapi_transport ||= Testing::Transport.for(self)
+        end
+
+        def openapi_response
+          openapi_transport.response
         end
 
         # submit_openapi_request is public so specs can call it directly
@@ -308,19 +319,19 @@ module OpenapiRuby
             raise "Request validation failed:\n#{req_errors.join("\n")}" unless req_errors.empty?
           end
 
-          send(method.to_sym, path, **request_args)
+          openapi_transport.dispatch(method, path, **request_args)
         end
 
         def assert_openapi_response(metadata)
           response_ctx = find_in_metadata(metadata, :openapi_response)
 
           expected_status = response_ctx.status_code.to_i
-          actual_status = response.status
+          actual_status = openapi_response.status
 
           unless actual_status == expected_status
             raise "Response validation failed:\n" \
               "Expected status #{expected_status}, got #{actual_status}\n" \
-              "Response body: #{response.body}"
+              "Response body: #{openapi_response.body}"
           end
 
           if response_ctx.schema_definition
@@ -328,11 +339,11 @@ module OpenapiRuby
             validator = Testing::ResponseValidator.new(OpenapiRuby::Adapters::RSpec.validation_document_for(schema_name))
             errors = validator.validate(
               response_body: parsed_response_body,
-              status_code: response.status,
+              status_code: openapi_response.status,
               response_context: response_ctx
             )
             unless errors.empty?
-              raise "Response body validation failed:\n#{errors.join("\n")}\nResponse body: #{response.body}"
+              raise "Response body validation failed:\n#{errors.join("\n")}\nResponse body: #{openapi_response.body}"
             end
           end
         end
@@ -438,10 +449,10 @@ module OpenapiRuby
         end
 
         def parsed_response_body
-          return nil if response.body.empty?
-          JSON.parse(response.body)
+          return nil if openapi_response.body.empty?
+          JSON.parse(openapi_response.body)
         rescue JSON::ParserError
-          response.body
+          openapi_response.body
         end
       end
 
