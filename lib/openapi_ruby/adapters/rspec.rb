@@ -486,6 +486,9 @@ module OpenapiRuby
 
           if defined?(::RSpec::Rails)
             config.include ::RSpec::Rails::RequestExampleGroup, type: :openapi
+          elsif OpenapiRuby.hanami_host?
+            require "openapi_ruby/hanami"
+            OpenapiRuby::Hanami.install_rspec!(config)
           end
 
           # Schema writing is handled by the rake task (openapi_ruby:generate),

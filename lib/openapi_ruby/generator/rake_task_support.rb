@@ -24,6 +24,23 @@ module OpenapiRuby
         end
       end
 
+      # Which framework hosts the app being generated for. Hanami keeps its app
+      # class in config/app.rb where Rails uses config/application.rb.
+      def detect_host
+        return "hanami" if defined?(::Hanami)
+        return "hanami" if File.exist?("config/app.rb") && !File.exist?("config/application.rb")
+
+        "rails"
+      end
+
+      # Env for the generation subprocess: the host's own environment variable
+      # plus the flag that tells the gem it is generating rather than serving.
+      def subprocess_env(host = detect_host)
+        env_var = (host == "hanami") ? "HANAMI_ENV" : "RAILS_ENV"
+
+        {env_var => ENV.fetch(env_var, "test"), "OPENAPI_RUBY_GENERATING" => "true"}
+      end
+
       def default_pattern_for(framework)
         case framework
         when "rspec" then "spec/**/*_spec.rb"
