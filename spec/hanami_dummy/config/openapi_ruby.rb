@@ -18,7 +18,8 @@ OpenapiRuby.configure do |config|
   config.response_validation = :enabled
   config.ui_enabled = true
 
-  # Generated output goes to tmp/ so it never overwrites the hand-maintained
-  # openapi/public_api.yaml the middleware loads at boot.
-  config.schema_output_dir = "tmp/openapi"
+  # Default "openapi" — the same directory the middleware loads at boot and the
+  # mounted endpoints serve from, so `rake openapi_ruby:generate` regenerating
+  # the committed document is exactly what should happen here.
+  config.schema_output_dir = "openapi"
 end
