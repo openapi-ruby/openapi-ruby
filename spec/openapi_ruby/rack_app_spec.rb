@@ -106,10 +106,30 @@ RSpec.describe OpenapiRuby::RackApp do
     end
   end
 
-  it "405s on non-GET requests" do
+  it "405s on non-GET requests, naming the methods it does allow" do
     post "/schemas"
 
     expect(last_response.status).to eq(405)
+    expect(last_response.headers["allow"]).to eq("GET, HEAD")
+  end
+
+  # Rails runs Rack::Head above the engine; a bare Hanami mount does not, so
+  # the body has to be dropped here.
+  describe "HEAD requests" do
+    it "answers with the status and headers but no body" do
+      head "/schemas/public_api.yaml"
+
+      expect(last_response.status).to eq(200)
+      expect(last_response.headers["content-type"]).to eq("application/x-yaml")
+      expect(last_response.body).to be_empty
+    end
+
+    it "still reports a missing schema as a 404" do
+      head "/schemas/unknown.yaml"
+
+      expect(last_response.status).to eq(404)
+      expect(last_response.body).to be_empty
+    end
   end
 
   it "404s on unknown paths" do

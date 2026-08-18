@@ -27,13 +27,17 @@ module OpenapiRuby
       request = ::Rack::Request.new(env)
       return method_not_allowed unless request.get? || request.head?
 
-      case request.path_info
+      status, headers, body = case request.path_info
       when "", "/" then ui(request)
       when "/schemas" then schema_index
       when "/oauth2-redirect.html" then oauth2_redirect
       when SCHEMA_PATH then schema(::Regexp.last_match(:name), request)
       else not_found
       end
+
+      # Drop the body ourselves: Rails runs Rack::Head above the engine, a bare
+      # Hanami mount has nothing between the router and here.
+      [status, headers, request.head? ? [] : body]
     end
 
     private
@@ -75,8 +79,8 @@ module OpenapiRuby
       end
     end
 
-    def respond(status, content_type, body)
-      [status, {"content-type" => content_type}, [body]]
+    def respond(status, content_type, body, headers = {})
+      [status, {"content-type" => content_type}.merge(headers), [body]]
     end
 
     def not_found
@@ -84,7 +88,7 @@ module OpenapiRuby
     end
 
     def method_not_allowed
-      respond(405, "application/json", {error: "Method not allowed"}.to_json)
+      respond(405, "application/json", {error: "Method not allowed"}.to_json, "allow" => "GET, HEAD")
     end
   end
 end
