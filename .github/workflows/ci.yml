@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+  # Every pull request, whatever it targets: a PR stacked on another branch
+  # would otherwise merge with no test job having run at all.
   pull_request:
-    branches: [main]
   merge_group:
 
 jobs:
