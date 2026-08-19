@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.2.0](https://github.com/openapi-ruby/openapi-ruby/compare/v4.1.0...v4.2.0) (2026-08-19)
+
+
+### Features
+
+* **hanami:** support Hanami as a second host framework ([#53](https://github.com/openapi-ruby/openapi-ruby/issues/53)) ([7279db3](https://github.com/openapi-ruby/openapi-ruby/commit/7279db35f440a2fda41b6c546ccb2703e4f4f43d))
+* **rack:** support Sinatra and bare Rack hosts ([#54](https://github.com/openapi-ruby/openapi-ruby/issues/54)) ([ac2d489](https://github.com/openapi-ruby/openapi-ruby/commit/ac2d48936942c9bce21c8687a8b2ee046f29edb6))
+
 ## [4.1.0](https://github.com/openapi-ruby/openapi-ruby/compare/v4.0.3...v4.1.0) (2026-08-10)
 
 
