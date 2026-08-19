@@ -13,6 +13,21 @@ module OpenapiRuby
           base.extend ClassMethods
           base.class_attribute :_openapi_contexts, default: []
           base.class_attribute :_openapi_schema_name, default: nil
+
+          install_rack_test!(base)
+        end
+
+        # On Rails the test class already inherits ActionDispatch's integration
+        # helpers. Every other host drives requests through rack-test, and the
+        # class defines `app` itself.
+        def self.install_rack_test!(base)
+          return if OpenapiRuby.rails_host?
+          return if base.method_defined?(:last_response)
+
+          require "rack/test"
+          base.include ::Rack::Test::Methods
+        rescue LoadError
+          nil
         end
 
         module ClassMethods

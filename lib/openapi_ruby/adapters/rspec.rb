@@ -479,6 +479,20 @@ module OpenapiRuby
         end
       end
 
+      # Every host but Rails drives requests through rack-test. Hanami also
+      # gets a default `app`; elsewhere (Sinatra, Roda, bare Rack) there is no
+      # convention for which app is under test, so the suite defines it.
+      def self.install_rack_test!(config, app_module: nil)
+        require "rack/test"
+
+        config.include ::Rack::Test::Methods, type: :openapi
+        config.include app_module, type: :openapi if app_module
+      rescue LoadError
+        # No rack-test in the bundle. Testing::Transport raises with setup
+        # instructions if a spec then tries to issue a request.
+        nil
+      end
+
       def self.install!
         ::RSpec.configure do |config|
           config.extend ExampleGroupHelpers, type: :openapi
@@ -489,6 +503,8 @@ module OpenapiRuby
           elsif OpenapiRuby.hanami_host?
             require "openapi_ruby/hanami"
             OpenapiRuby::Hanami.install_rspec!(config)
+          else
+            install_rack_test!(config)
           end
 
           # Schema writing is handled by the rake task (openapi_ruby:generate),
