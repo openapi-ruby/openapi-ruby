@@ -17,10 +17,34 @@ module OpenapiRuby
         if context.respond_to?(:integration_session)
           RailsIntegration.new(context)
         elsif context.respond_to?(:last_response)
+          require_app!(context)
           RackTest.new(context)
-        else
+        elsif OpenapiRuby.rails_host?
+          # A hand-rolled harness that defines the verb methods itself. Left
+          # working rather than second-guessed.
           RailsIntegration.new(context)
+        else
+          # Without rack-test, dispatch would land on the example-group DSL's
+          # own `get`, and the user would get told that `get` is unavailable
+          # inside an example — true, and no help at all here.
+          raise OpenapiRuby::Error,
+            "openapi_ruby found no way to issue requests from #{describe(context)}. " \
+            "Add rack-test to your bundle, `include Rack::Test::Methods`, and define `app`."
         end
+      end
+
+      # rack-test resolves `app` lazily, so a missing one surfaces as a bare
+      # NameError from inside the gem rather than as the setup mistake it is.
+      def self.require_app!(context)
+        return if context.respond_to?(:app)
+
+        raise OpenapiRuby::Error,
+          "openapi_ruby needs the Rack app under test in #{describe(context)}. " \
+          "Define it as `let(:app) { MyApp }` in RSpec, or an `app` method in Minitest."
+      end
+
+      def self.describe(context)
+        context.is_a?(Class) ? context.name.to_s : context.class.name.to_s
       end
 
       class RailsIntegration
