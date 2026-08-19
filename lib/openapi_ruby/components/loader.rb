@@ -11,6 +11,7 @@ module OpenapiRuby
       end
 
       def load!
+        warn_about_autoloaded_paths!
         define_namespace_modules!
         load_component_files!
         @@loaded = true # rubocop:disable Style/ClassVars
@@ -59,6 +60,20 @@ module OpenapiRuby
       end
 
       private
+
+      # A component under Hanami's app/ directory loads fine here (we require
+      # the file directly) but Zeitwerk expects that file to define a deeper,
+      # app-namespaced constant — so the mismatch only surfaces on eager load
+      # in production.
+      def warn_about_autoloaded_paths!
+        return unless OpenapiRuby.hanami_host?
+
+        offending = @paths.select { |path| path.to_s.match?(%r{(\A|/)app/}) }
+        return if offending.empty?
+
+        warn "[openapi_ruby] component_paths #{offending.inspect} sit under Hanami's autoloaded " \
+          "app/ directory. Move them outside it (e.g. config/api_components) to avoid Zeitwerk conflicts."
+      end
 
       def define_namespace_modules!
         @paths.each do |path|

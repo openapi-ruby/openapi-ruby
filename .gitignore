@@ -10,4 +10,5 @@
 *.lock
 log/
 spec/dummy/tmp/
+spec/hanami_dummy/tmp/
 /.worktrees/

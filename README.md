@@ -5,7 +5,7 @@
 <h1 align="center">openapi_ruby</h1>
 
 <p align="center">
-  A unified OpenAPI toolkit for Rails that combines test-driven spec generation, reusable schema components as Ruby classes, and runtime request/response validation middleware. Supports OpenAPI 3.0 and 3.1. Works with both RSpec and Minitest.
+  A unified OpenAPI toolkit for Rails and Hanami that combines test-driven spec generation, reusable schema components as Ruby classes, and runtime request/response validation middleware. Supports OpenAPI 3.0 and 3.1. Works with both RSpec and Minitest.
 </p>
 
 Replaces [rswag](https://github.com/rswag/rswag), [rswag-schema-components](https://github.com/101skills-gmbh/rswag-schema-components), and [committee](https://github.com/interagent/committee) with a single gem.
@@ -14,6 +14,7 @@ Replaces [rswag](https://github.com/rswag/rswag), [rswag-schema-components](http
 
 - **OpenAPI 3.0 & 3.1** with JSON Schema 2020-12 (via [json_schemer](https://github.com/davishmcclurg/json_schemer))
 - **Test-framework agnostic** — works with RSpec and Minitest
+- **Host-framework agnostic** — works on Rails and Hanami 2/3
 - **Schema components** as Ruby classes with inheritance
 - **Runtime middleware** for request/response validation with deep type checking
 - **Strong params** derived from schema components
@@ -23,7 +24,7 @@ Replaces [rswag](https://github.com/rswag/rswag), [rswag-schema-components](http
 ## Requirements
 
 - Ruby >= 3.2
-- Rails >= 7.0
+- Rails >= 7.0, or Hanami >= 2.3 (see [Hanami](#hanami))
 
 ## Installation
 
@@ -46,6 +47,8 @@ This creates:
 - `app/api_components/` — directory for schema components
 - `openapi/` — output directory for generated specs
 - Engine mount in `config/routes.rb`
+
+On Hanami there is no install generator — see [Hanami](#hanami) for the equivalent setup.
 
 ## Configuration
 
@@ -606,6 +609,111 @@ end
 
 Once the migration completes and only one test framework remains, the rake task auto-detects that framework, and the guard goes back to being a pure optimization.
 
+## Hanami
+
+Rails picks up its wiring from the engine. On Hanami you make the same calls yourself — three of them, all optional except the first. Tested against Hanami 2.3 and 3.0; see [`spec/hanami_dummy`](spec/hanami_dummy) for a working app.
+
+**1. Configure.** Anywhere that loads before your app class — `config/openapi_ruby.rb` is a natural home:
+
+```ruby
+require "openapi_ruby/hanami"
+
+OpenapiRuby.configure do |config|
+  config.schemas = {
+    public_api: {
+      info: { title: "My API", version: "v1" },
+      servers: [{ url: "/api/v1" }],
+      prefix: "/api/v1" # scopes the validation middleware to the API
+    }
+  }
+end
+```
+
+Components default to `config/api_components/` on Hanami instead of `app/api_components/`. Zeitwerk owns everything under `app/` and expects `app/api_components/schemas/user.rb` to define `MyApp::ApiComponents::Schemas::User`, while the component loader requires the file directly — which loads fine in tests and fails on eager load in production. Keeping components outside the autoload roots avoids the clash; openapi_ruby warns if `component_paths` points inside `app/`.
+
+**2. Install the middleware** (only needed for runtime validation) in `config/app.rb`:
+
+```ruby
+require "hanami"
+require_relative "openapi_ruby"
+
+module MyApp
+  class App < Hanami::App
+    # Declared before :body_parser so the validation middleware reads and
+    # rewinds the request body first.
+    OpenapiRuby::Hanami.install_middleware!(config)
+
+    config.middleware.use :body_parser, :json
+  end
+end
+```
+
+**3. Mount the docs endpoints** in `config/routes.rb`:
+
+```ruby
+module MyApp
+  class Routes < Hanami::Routes
+    mount OpenapiRuby::RackApp, at: "/api-docs"
+  end
+end
+```
+
+`OpenapiRuby::RackApp` serves the same paths as the Rails engine: `/api-docs/schemas`, `/api-docs/schemas/:name`, and the Swagger UI at `/api-docs` once `ui_enabled` is set.
+
+### Request specs
+
+`require "openapi_ruby/rspec"` wires rack-test into `type: :openapi` example groups and points it at `Hanami.app`:
+
+```ruby
+# spec/spec_helper.rb
+ENV["HANAMI_ENV"] ||= "test"
+
+require "hanami/prepare"
+require "openapi_ruby/rspec"
+```
+
+Specs are then written in the `api_path` / `assert_api_response` style, identical to the Rails version:
+
+```ruby
+RSpec.describe "Posts API", type: :openapi do
+  openapi_schema :public_api
+
+  api_path "/posts" do
+    get "List posts" do
+      tags "Posts"
+      produces "application/json"
+
+      response 200, "returns posts" do
+        schema type: :array, items: { "$ref" => "#/components/schemas/Post" }
+      end
+    end
+  end
+
+  it "returns all posts" do
+    assert_api_response :get, 200 do
+      expect(parsed_body.length).to eq(2)
+    end
+  end
+end
+```
+
+Define `let(:app)` in a group to drive a slice instead of the whole app.
+
+### Spec generation
+
+The Rails engine loads the rake task on its own; Hanami has no engines, so add it to your Rakefile:
+
+```ruby
+require "openapi_ruby/rake_tasks"
+```
+
+`bundle exec rake openapi_ruby:generate` then works as it does on Rails — it detects the Hanami host, sets `HANAMI_ENV=test` for the generation subprocess, and writes to `schema_output_dir`.
+
+### Rails-only features
+
+- The `openapi_ruby:install` and `openapi_ruby:component` generators build on `Rails::Generators`, which has no Hanami counterpart. Create the equivalent files by hand.
+- `openapi_permit` derives strong params from a component, which is an ActionController concept. Hanami has its own params contracts.
+
 ## Runtime Middleware
 
 Validate requests and responses against your OpenAPI spec at runtime:
@@ -646,7 +754,7 @@ Mount the engine to expose the schema endpoints:
 mount OpenapiRuby::Engine => "/api-docs"
 ```
 
-Schema files are served at `/api-docs/schemas/:name`.
+Schema files are served at `/api-docs/schemas/:name`. On Hanami, mount `OpenapiRuby::RackApp` instead — see [Hanami](#hanami).
 
 To also serve the interactive Swagger UI at the mount root, opt in:
 

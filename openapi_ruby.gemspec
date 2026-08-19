@@ -8,10 +8,10 @@ Gem::Specification.new do |spec|
   spec.authors = ["Morten Hartvig"]
   spec.email = ["morten@hartvigsen.dev"]
 
-  spec.summary = "OpenAPI 3.0/3.1 toolkit for Rails — spec generation, schema components, and runtime validation"
-  spec.description = "A unified OpenAPI toolkit for Rails that combines test-driven spec generation, " \
-                     "reusable schema components as Ruby classes, and runtime request/response validation " \
-                     "middleware. Supports OpenAPI 3.0 and 3.1. Works with both RSpec and Minitest."
+  spec.summary = "OpenAPI 3.0/3.1 toolkit for Rails and Hanami — spec generation, schema components, and runtime validation"
+  spec.description = "A unified OpenAPI toolkit for Rails and Hanami that combines test-driven spec " \
+                     "generation, reusable schema components as Ruby classes, and runtime request/response " \
+                     "validation middleware. Supports OpenAPI 3.0 and 3.1. Works with both RSpec and Minitest."
   spec.homepage = "https://github.com/openapi-ruby/openapi-ruby"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
@@ -30,5 +30,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activesupport", ">= 7.0"
   spec.add_dependency "json_schemer", "~> 2.4"
   spec.add_dependency "rack", ">= 2.0"
-  spec.add_dependency "railties", ">= 7.0"
 end

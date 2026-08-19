@@ -48,9 +48,21 @@ module OpenapiRuby
     # UI (optional)
     attr_accessor :ui_enabled, :ui_config
 
+    RAILS_COMPONENT_PATHS = ["app/api_components"].freeze
+
+    # Hanami's Zeitwerk owns every constant under app/ and expects
+    # app/api_components/schemas/user.rb to define a deeper constant than
+    # Components::Loader's plain require does, so the Hanami default keeps
+    # components outside its autoload roots.
+    HANAMI_COMPONENT_PATHS = ["config/api_components"].freeze
+
+    def self.default_component_paths
+      (OpenapiRuby.hanami_host? ? HANAMI_COMPONENT_PATHS : RAILS_COMPONENT_PATHS).dup
+    end
+
     def initialize
       @schemas = {}
-      @component_paths = ["app/api_components"]
+      @component_paths = self.class.default_component_paths
       @component_scope_paths = {}
       @camelize_keys = true
       @request_validation = :disabled
