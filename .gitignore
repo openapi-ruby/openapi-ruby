@@ -11,4 +11,5 @@
 log/
 spec/dummy/tmp/
 spec/hanami_dummy/tmp/
+spec/sinatra_dummy/tmp/
 /.worktrees/

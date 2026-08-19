@@ -42,14 +42,11 @@ module OpenapiRuby
     # `require "openapi_ruby/rspec"`; exposed for suites that configure RSpec
     # by hand.
     def install_rspec!(rspec_config = nil)
-      require "rack/test"
-
-      wire = lambda do |config|
-        config.include ::Rack::Test::Methods, type: :openapi
-        config.include RackTestApp, type: :openapi
+      if rspec_config
+        Adapters::RSpec.install_rack_test!(rspec_config, app_module: RackTestApp)
+      else
+        ::RSpec.configure { |config| Adapters::RSpec.install_rack_test!(config, app_module: RackTestApp) }
       end
-
-      rspec_config ? wire.call(rspec_config) : ::RSpec.configure(&wire)
     end
 
     def config_root(config)

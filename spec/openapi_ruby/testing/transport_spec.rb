@@ -37,6 +37,10 @@ RSpec.describe OpenapiRuby::Testing::Transport do
         @last_response = Rack::MockResponse.new(200, {}, "{}")
       end
 
+      def app
+        :the_app_under_test
+      end
+
       def get(path, params = {}, env = {})
         @calls << [:get, path, params, env]
       end
@@ -63,6 +67,34 @@ RSpec.describe OpenapiRuby::Testing::Transport do
       def context.last_response = nil
 
       expect(described_class.for(context)).to be_a(described_class::RailsIntegration)
+    end
+
+    # rack-test resolves `app` lazily, so without this the mistake surfaces as
+    # a NameError raised from inside the gem.
+    it "explains a rack-test context that never named its app" do
+      context = rack_test_context
+      context.singleton_class.undef_method(:app)
+
+      expect { described_class.for(context) }
+        .to raise_error(OpenapiRuby::Error, /needs the Rack app under test.*let\(:app\)/m)
+    end
+
+    context "with no request API at all" do
+      # A hand-rolled harness defining only the verb methods. Rails suites have
+      # shipped these, so they keep working rather than being second-guessed.
+      it "falls back to the Rails transport on a Rails host" do
+        expect(described_class.for(Object.new)).to be_a(described_class::RailsIntegration)
+      end
+
+      # Otherwise rack-test is simply missing, and dispatch would land on the
+      # example-group DSL's own `get` — an error about `get` being unavailable
+      # inside an example, which explains nothing.
+      it "tells a non-Rails host how to wire rack-test" do
+        allow(OpenapiRuby).to receive(:rails_host?).and_return(false)
+
+        expect { described_class.for(Object.new) }
+          .to raise_error(OpenapiRuby::Error, /Add rack-test.*include Rack::Test::Methods/m)
+      end
     end
   end
 

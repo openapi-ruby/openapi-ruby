@@ -5,7 +5,7 @@
 <h1 align="center">openapi_ruby</h1>
 
 <p align="center">
-  A unified OpenAPI toolkit for Rails and Hanami that combines test-driven spec generation, reusable schema components as Ruby classes, and runtime request/response validation middleware. Supports OpenAPI 3.0 and 3.1. Works with both RSpec and Minitest.
+  A unified OpenAPI toolkit for Rails, Hanami, and Rack that combines test-driven spec generation, reusable schema components as Ruby classes, and runtime request/response validation middleware. Supports OpenAPI 3.0 and 3.1. Works with both RSpec and Minitest.
 </p>
 
 Replaces [rswag](https://github.com/rswag/rswag), [rswag-schema-components](https://github.com/101skills-gmbh/rswag-schema-components), and [committee](https://github.com/interagent/committee) with a single gem.
@@ -14,7 +14,7 @@ Replaces [rswag](https://github.com/rswag/rswag), [rswag-schema-components](http
 
 - **OpenAPI 3.0 & 3.1** with JSON Schema 2020-12 (via [json_schemer](https://github.com/davishmcclurg/json_schemer))
 - **Test-framework agnostic** — works with RSpec and Minitest
-- **Host-framework agnostic** — works on Rails and Hanami 2/3
+- **Host-framework agnostic** — works on Rails, Hanami, Sinatra, and bare Rack
 - **Schema components** as Ruby classes with inheritance
 - **Runtime middleware** for request/response validation with deep type checking
 - **Strong params** derived from schema components
@@ -24,7 +24,7 @@ Replaces [rswag](https://github.com/rswag/rswag), [rswag-schema-components](http
 ## Requirements
 
 - Ruby >= 3.2
-- Rails >= 7.0, or Hanami >= 2.3 (see [Hanami](#hanami))
+- Rails >= 7.0, Hanami >= 2.3, or any Rack app (see [Host Frameworks](#host-frameworks))
 
 ## Installation
 
@@ -48,7 +48,7 @@ This creates:
 - `openapi/` — output directory for generated specs
 - Engine mount in `config/routes.rb`
 
-On Hanami there is no install generator — see [Hanami](#hanami) for the equivalent setup.
+The install generator is Rails-only — see [Host Frameworks](#host-frameworks) for the equivalent setup elsewhere.
 
 ## Configuration
 
@@ -609,9 +609,21 @@ end
 
 Once the migration completes and only one test framework remains, the rake task auto-detects that framework, and the guard goes back to being a pure optimization.
 
-## Hanami
+## Host Frameworks
 
-Rails picks up its wiring from the engine. On Hanami you make the same calls yourself — three of them, all optional except the first. Tested against Hanami 2.3 and 3.0; see [`spec/hanami_dummy`](spec/hanami_dummy) for a working app.
+Rails picks up its wiring from the engine. Every other host makes the same calls itself — the gem only ever needs a Rack middleware stack, a way to mount a Rack app, and rack-test.
+
+| | Rails | Hanami | Sinatra / Roda / bare Rack |
+|---|---|---|---|
+| Test DSL + generation | ✅ | ✅ | ✅ |
+| Runtime validation middleware | automatic | one call | one call |
+| Schema + Swagger UI endpoints | `mount OpenapiRuby::Engine` | `mount OpenapiRuby::RackApp` | `map`/`run OpenapiRuby::RackApp` |
+| `openapi_ruby:install` / `:component` generators | ✅ | — | — |
+| `openapi_permit` strong params | ✅ | — | — |
+
+Versions covered by CI: Rails 7.0–8.0, Hanami 2.3 and 3.0, Sinatra 3.2 and 4.2. Working reference apps live in [`spec/dummy`](spec/dummy), [`spec/hanami_dummy`](spec/hanami_dummy), and [`spec/sinatra_dummy`](spec/sinatra_dummy).
+
+### Hanami
 
 **1. Configure.** Anywhere that loads before your app class — `config/openapi_ruby.rb` is a natural home:
 
@@ -658,11 +670,7 @@ module MyApp
 end
 ```
 
-`OpenapiRuby::RackApp` serves the same paths as the Rails engine: `/api-docs/schemas`, `/api-docs/schemas/:name`, and the Swagger UI at `/api-docs` once `ui_enabled` is set.
-
-### Request specs
-
-`require "openapi_ruby/rspec"` wires rack-test into `type: :openapi` example groups and points it at `Hanami.app`:
+For request specs, `require "openapi_ruby/rspec"` wires rack-test into `type: :openapi` example groups and points it at `Hanami.app`:
 
 ```ruby
 # spec/spec_helper.rb
@@ -672,7 +680,94 @@ require "hanami/prepare"
 require "openapi_ruby/rspec"
 ```
 
-Specs are then written in the `api_path` / `assert_api_response` style, identical to the Rails version:
+Define `let(:app)` in a group to drive a slice instead of the whole app.
+
+### Sinatra, Roda, and bare Rack
+
+Nothing here is Sinatra-specific — it is the same three steps against a plain Rack app.
+
+**1. Configure**, and say where components live. There is no autoload convention to infer one from:
+
+```ruby
+# config/openapi_ruby.rb
+require "openapi_ruby"
+
+OpenapiRuby.configure do |config|
+  config.schemas = {
+    public_api: {
+      info: { title: "My API", version: "v1" },
+      servers: [{ url: "/api/v1" }],
+      prefix: "/api/v1"
+    }
+  }
+
+  config.component_paths = ["api_components"]
+end
+```
+
+**2. Install the middleware** onto the app's stack. `Installer#install!` takes anything that responds to `use`, which a `Sinatra::Base` subclass does:
+
+```ruby
+class App < Sinatra::Base
+  OpenapiRuby::Middleware::Installer.install!(self, root: __dir__)
+
+  # ... routes
+end
+```
+
+For Roda or bare Rack, hand it the builder instead — `OpenapiRuby::Middleware::Installer.install!(builder, root: __dir__)` inside `Rack::Builder.new { ... }`.
+
+**3. Mount the docs endpoints** in `config.ru`:
+
+```ruby
+require_relative "app"
+
+map "/api-docs" do
+  run OpenapiRuby::RackApp
+end
+
+map "/" do
+  run App
+end
+```
+
+For request specs, `require "openapi_ruby/rspec"` includes rack-test for you; naming the app is the only wiring left, since no Rack host has a convention for which app is under test:
+
+```ruby
+# spec/spec_helper.rb
+ENV["APP_ENV"] ||= "test"
+
+require_relative "../app"
+require "openapi_ruby/rspec"
+
+module AppUnderTest
+  def app
+    App
+  end
+end
+
+RSpec.configure do |config|
+  config.include AppUnderTest, type: :openapi
+end
+```
+
+Minitest is the same shape — including the DSL brings rack-test with it, and the class defines `app`:
+
+```ruby
+class ApiTest < Minitest::Test
+  include OpenapiRuby::Adapters::Minitest::DSL
+
+  def app
+    App
+  end
+end
+```
+
+> **Getting 403 "Host not permitted"?** Sinatra only relaxes its host authorization outside `development`, and rack-test sends `Host: example.org`. Set `APP_ENV=test` (or `RACK_ENV=test`) in your test helper — the snippet above does.
+
+### Specs and generation on every host
+
+Specs are written identically regardless of host, in either DSL style:
 
 ```ruby
 RSpec.describe "Posts API", type: :openapi do
@@ -697,22 +792,13 @@ RSpec.describe "Posts API", type: :openapi do
 end
 ```
 
-Define `let(:app)` in a group to drive a slice instead of the whole app.
-
-### Spec generation
-
-The Rails engine loads the rake task on its own; Hanami has no engines, so add it to your Rakefile:
+The Rails engine loads the rake task on its own. Elsewhere, add it to your Rakefile:
 
 ```ruby
 require "openapi_ruby/rake_tasks"
 ```
 
-`bundle exec rake openapi_ruby:generate` then works as it does on Rails — it detects the Hanami host, sets `HANAMI_ENV=test` for the generation subprocess, and writes to `schema_output_dir`.
-
-### Rails-only features
-
-- The `openapi_ruby:install` and `openapi_ruby:component` generators build on `Rails::Generators`, which has no Hanami counterpart. Create the equivalent files by hand.
-- `openapi_permit` derives strong params from a component, which is an ActionController concept. Hanami has its own params contracts.
+`bundle exec rake openapi_ruby:generate` then behaves as it does on Rails. It detects the host and sets the environment variable that host reads — `RAILS_ENV`, `HANAMI_ENV`, or `APP_ENV`/`RACK_ENV` — for the generation subprocess.
 
 ## Runtime Middleware
 
@@ -754,7 +840,7 @@ Mount the engine to expose the schema endpoints:
 mount OpenapiRuby::Engine => "/api-docs"
 ```
 
-Schema files are served at `/api-docs/schemas/:name`. On Hanami, mount `OpenapiRuby::RackApp` instead — see [Hanami](#hanami).
+Schema files are served at `/api-docs/schemas/:name`. On any other host, mount `OpenapiRuby::RackApp` instead — see [Host Frameworks](#host-frameworks).
 
 To also serve the interactive Swagger UI at the mount root, opt in:
 

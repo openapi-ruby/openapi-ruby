@@ -24,21 +24,39 @@ module OpenapiRuby
         end
       end
 
-      # Which framework hosts the app being generated for. Hanami keeps its app
-      # class in config/app.rb where Rails uses config/application.rb.
+      # Which framework hosts the app being generated for. Detected from the
+      # filesystem as well as loaded constants: the rake process has not booted
+      # the app yet. Hanami keeps its app class in config/app.rb where Rails
+      # uses config/application.rb; a config.ru with neither is a Rack app
+      # (Sinatra, Roda, bare Rack).
       def detect_host
-        return "hanami" if defined?(::Hanami)
-        return "hanami" if File.exist?("config/app.rb") && !File.exist?("config/application.rb")
+        # Files describe the app being generated for; loaded constants only say
+        # what the Rakefile happened to require, which in a mixed bundle can be
+        # either framework.
+        return "rails" if File.exist?("config/application.rb")
+        return "hanami" if File.exist?("config/app.rb")
+        return "rack" if File.exist?("config.ru")
 
-        "rails"
+        OpenapiRuby.host.to_s
       end
 
-      # Env for the generation subprocess: the host's own environment variable
+      # Environment variables the host reads to decide it is running under test.
+      # Sinatra takes APP_ENV first and falls back to RACK_ENV; other Rack apps
+      # read one or the other, so a Rack host gets both.
+      HOST_ENV_VARS = {
+        "rails" => ["RAILS_ENV"],
+        "hanami" => ["HANAMI_ENV"],
+        "rack" => ["APP_ENV", "RACK_ENV"]
+      }.freeze
+
+      # Env for the generation subprocess: the host's own environment variables
       # plus the flag that tells the gem it is generating rather than serving.
       def subprocess_env(host = detect_host)
-        env_var = (host == "hanami") ? "HANAMI_ENV" : "RAILS_ENV"
+        env = HOST_ENV_VARS.fetch(host, HOST_ENV_VARS["rails"]).to_h do |var|
+          [var, ENV.fetch(var, "test")]
+        end
 
-        {env_var => ENV.fetch(env_var, "test"), "OPENAPI_RUBY_GENERATING" => "true"}
+        env.merge("OPENAPI_RUBY_GENERATING" => "true")
       end
 
       def default_pattern_for(framework)

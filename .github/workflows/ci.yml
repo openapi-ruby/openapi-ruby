@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+  # Every pull request, whatever it targets: a PR stacked on another branch
+  # would otherwise merge with no test job having run at all.
   pull_request:
-    branches: [main]
   merge_group:
 
 jobs:
@@ -66,6 +67,43 @@ jobs:
       # would quietly stop exercising validation.
       - name: Check the committed schema is current
         working-directory: spec/hanami_dummy
+        run: |
+          bundle exec rake openapi_ruby:generate
+          git diff --exit-code openapi/
+
+  sinatra:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.2", "3.3", "3.4"]
+        sinatra: ["3.2", "4.2"]
+
+    name: Ruby ${{ matrix.ruby }} / Sinatra ${{ matrix.sinatra }}
+
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/sinatra.gemfile
+      SINATRA_VERSION: ${{ matrix.sinatra }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      # A plain Rack host: no framework integration beyond the Rack SPEC.
+      - name: Run Sinatra dummy app specs
+        working-directory: spec/sinatra_dummy
+        run: bundle exec rspec
+
+      - name: Run Sinatra dummy app Minitest tests
+        working-directory: spec/sinatra_dummy
+        run: bundle exec ruby -Itest test/posts_test.rb
+
+      - name: Check the committed schema is current
+        working-directory: spec/sinatra_dummy
         run: |
           bundle exec rake openapi_ruby:generate
           git diff --exit-code openapi/

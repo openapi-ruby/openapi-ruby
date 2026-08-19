@@ -3,6 +3,38 @@
 require "spec_helper"
 require_relative "../support/rails_app"
 
+RSpec.describe "OpenapiRuby host detection" do
+  describe ".host" do
+    it "is :rails when Rails is loaded" do
+      expect(OpenapiRuby.host).to eq(:rails)
+      expect(OpenapiRuby).to be_rails_host
+    end
+
+    it "is :hanami when only Hanami is loaded" do
+      hide_const("Rails")
+      stub_const("Hanami", Module.new)
+
+      expect(OpenapiRuby.host).to eq(:hanami)
+      expect(OpenapiRuby).to be_hanami_host
+    end
+
+    # Sinatra, Roda, bare Rack — anything whose only shared surface is Rack.
+    it "is :rack with no framework loaded" do
+      hide_const("Rails")
+
+      expect(OpenapiRuby.host).to eq(:rack)
+      expect(OpenapiRuby).to be_rack_host
+    end
+
+    # A Rails app with another framework's gems in the bundle is still Rails.
+    it "prefers Rails when both constants are present" do
+      stub_const("Hanami", Module.new)
+
+      expect(OpenapiRuby.host).to eq(:rails)
+    end
+  end
+end
+
 RSpec.describe "OpenapiRuby.app_root" do
   it "uses the Rails root when Rails is booted" do
     expect(OpenapiRuby.app_root).to eq(Rails.root.to_s)

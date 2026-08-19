@@ -1,0 +1,18 @@
+# frozen_string_literal: true
+
+# Rails-free bundle: proves openapi-ruby works on a plain Rack host, with no
+# framework integration beyond the Rack SPEC itself.
+source "https://rubygems.org"
+
+gemspec path: ".."
+
+gem "rake"
+gem "rspec"
+
+group :test do
+  gem "sinatra", "~> #{ENV.fetch("SINATRA_VERSION", "4.2")}"
+  gem "minitest"
+  gem "rack-test"
+  # Sinatra 3 requires ostruct, which stopped being a Ruby default gem in 4.0.
+  gem "ostruct"
+end

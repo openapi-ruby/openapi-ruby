@@ -1,0 +1,163 @@
+---
+openapi: 3.1.0
+info:
+  title: Sinatra Dummy API
+  version: 1.0.0
+paths:
+  "/posts":
+    get:
+      summary: List posts
+      tags:
+      - Posts
+      operationId: listPosts
+      parameters:
+      - name: author
+        in: query
+        schema:
+          type: string
+        required: false
+      responses:
+        '200':
+          description: returns posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Post"
+        '400':
+          "$ref": "#/components/responses/SchemaValidationError"
+    post:
+      summary: Create a post
+      tags:
+      - Posts
+      operationId: createPost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/PostInput"
+      responses:
+        '201':
+          description: post created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Post"
+        '422':
+          description: validation errors
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationErrors"
+        '400':
+          "$ref": "#/components/responses/SchemaValidationError"
+  "/posts/{id}":
+    get:
+      summary: Get a post
+      tags:
+      - Posts
+      operationId: getPost
+      responses:
+        '200':
+          description: post found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Post"
+        '404':
+          description: post not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+    delete:
+      summary: Delete a post
+      tags:
+      - Posts
+      operationId: deletePost
+      responses:
+        '204':
+          description: post deleted
+        '404':
+          description: post not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+servers:
+- url: "/api/v1"
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: string
+      title: ErrorResponse
+    Post:
+      type: object
+      required:
+      - id
+      - title
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        body:
+          type:
+          - string
+          - 'null'
+        author:
+          type:
+          - string
+          - 'null'
+      title: Post
+    PostInput:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+        body:
+          type:
+          - string
+          - 'null'
+        author:
+          type:
+          - string
+          - 'null'
+      title: PostInput
+    ValidationErrors:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+      title: ValidationErrors
+  responses:
+    SchemaValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: string
+            required:
+            - error
+            - details
+security: []

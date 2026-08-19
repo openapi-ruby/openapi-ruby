@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A Ruby gem providing an OpenAPI 3.1 toolkit for Rails and Hanami. Combines test-driven spec generation, reusable schema components, and runtime request/response validation middleware.
+A Ruby gem providing an OpenAPI 3.1 toolkit for Rails, Hanami, and plain Rack apps. Combines test-driven spec generation, reusable schema components, and runtime request/response validation middleware.
 
 ## Development
 
@@ -19,7 +19,7 @@ Single gem with modular requires:
 - `lib/openapi_ruby/` — core library
 - `lib/openapi_ruby/rspec.rb` — require this for RSpec integration
 - `lib/openapi_ruby/minitest.rb` — require this for Minitest integration
-- `lib/openapi_ruby/hanami.rb` — require this on a Hanami host
+- `lib/openapi_ruby/hanami.rb` — require this on a Hanami host. Other Rack hosts (Sinatra, Roda) need no host file: they call `Middleware::Installer` and mount `RackApp` directly
 
 Key modules:
 
@@ -28,9 +28,9 @@ Key modules:
 - `DSL` — framework-agnostic test DSL (Context, OperationContext, ResponseContext, MetadataStore)
 - `Adapters` — RSpec and Minitest adapters. RSpec supports two DSL styles: `path`/`run_test!` (schema and test interleaved) and `api_path`/`assert_api_response` (schema at top, normal specs below). Minitest uses the `api_path`/`assert_api_response` style.
 - `Middleware` — Rack middleware for request/response validation. `Middleware::Installer` mounts it onto any stack responding to `use` (Rails' `app.middleware`, Hanami's `config.middleware`), which is all the Engine initializer does now
-- `Host` — `OpenapiRuby.app_root` / `.hanami_host?`, the only places that ask which framework is booted
+- `Host` — `OpenapiRuby.app_root` and `.host` (`:rails` / `:hanami` / `:rack`, Rails winning a tie), the only places that ask which framework is booted
 - `Serving` + `RackApp` — host-neutral schema/Swagger-UI serving. The Rails controllers under `app/controllers/` and `RackApp` (mounted directly on Hanami) are both thin shells over `Serving`
-- `Testing` — request/response validators, assertions, coverage tracking. `Testing::Transport` is the seam between the adapters and the host's request API: Rails integration keywords (`params:`/`headers:`, `response`) vs rack-test positional args plus a Rack env (`last_response`)
+- `Testing` — request/response validators, assertions, coverage tracking. `Testing::Transport` is the seam between the adapters and the host's request API: Rails integration keywords (`params:`/`headers:`, `response`) vs rack-test positional args plus a Rack env (`last_response`). Both adapters auto-include `Rack::Test::Methods` on non-Rails hosts; only Hanami gets a default `app`
 - `Generator` — OpenAPI spec file generation
 
 ## Testing
@@ -39,7 +39,11 @@ Key modules:
 - Generator tests in `spec/generators/`
 - Integration tests in `spec/integration/` — these boot the dummy Rails app
 - Dummy app in `spec/dummy/` — reference implementation with Users (RSpec `path`/`run_test!` style), Posts (Minitest and RSpec `api_path`/`assert_api_response` style)
-- Hanami dummy app in `spec/hanami_dummy/` — runs in its own Rails-free bundle (`gemfiles/hanami.gemfile`), since booting Rails and Hanami in one process is not worth fighting and the separate bundle also proves the gem loads without railties. Run it with `bundle exec rake spec:hanami`; `HANAMI_VERSION` selects the Hanami line (CI covers 2.3 and 3.0)
+- Alternate-host dummy apps, each in its own Rails-free bundle under `gemfiles/` — booting two frameworks in one process is not worth fighting, and the separate bundles also prove the gem loads without railties:
+  - `spec/hanami_dummy/` — `rake spec:hanami`, `HANAMI_VERSION` selects the line (CI covers 2.3 and 3.0)
+  - `spec/sinatra_dummy/` — `rake spec:sinatra`, `SINATRA_VERSION` selects the line (CI covers 3.2 and 4.2). Covers RSpec *and* Minitest, and mounts the docs endpoints through its real `config.ru`
+  - `rake spec:hosts` runs both
+- Each alternate host's CI job also regenerates its committed schema and fails on a diff — the middleware loads that document at boot, so a stale one silently stops exercising validation
 - Dummy app specs live in `spec/dummy/spec/` and `spec/dummy/test/` exactly as a user would write them
 - RSpec pattern excludes `spec/dummy/` from autodiscovery (see `.rspec`)
 
