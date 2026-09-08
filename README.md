@@ -284,6 +284,8 @@ rails generate openapi_ruby:component User schemas
 rails generate openapi_ruby:component BearerAuth security_schemes
 ```
 
+Files land in the first entry of `config.component_paths`, so the generator follows whatever the loader reads.
+
 ## Testing with RSpec
 
 ```ruby

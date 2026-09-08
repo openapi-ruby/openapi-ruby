@@ -50,4 +50,32 @@ RSpec.describe OpenapiRuby::Generators::ComponentGenerator do
       expect(content).to include("component_type :requestBodies")
     end
   end
+
+  context "with a configured component path" do
+    before { OpenapiRuby.configuration.component_paths = ["config/api_components"] }
+
+    it "creates the component under that path" do
+      run_generator(%w[User])
+      expect(File.exist?(File.join(destination, "config/api_components/schemas/user.rb"))).to be true
+      expect(File.exist?(File.join(destination, "app/api_components/schemas/user.rb"))).to be false
+    end
+  end
+
+  context "when the configured path is absolute" do
+    before { OpenapiRuby.configuration.component_paths = [File.join(destination, "api_components")] }
+
+    it "creates the component under that path" do
+      run_generator(%w[User])
+      expect(File.exist?(File.join(destination, "api_components/schemas/user.rb"))).to be true
+    end
+  end
+
+  context "when no component path is configured" do
+    before { OpenapiRuby.configuration.component_paths = [] }
+
+    it "falls back to the default path" do
+      run_generator(%w[User])
+      expect(File.exist?(File.join(destination, "app/api_components/schemas/user.rb"))).to be true
+    end
+  end
 end
