@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.0.0](https://github.com/openapi-ruby/openapi-ruby/compare/v4.2.0...v5.0.0) (2026-09-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* with camelize_keys on (the default), snake_case parameter names are emitted as camelCase and the test DSL sends them under that name. Set camelize_keys = false if your API takes snake_case parameters.
+
+### Features
+
+* camelize parameter names when camelize_keys is on ([#57](https://github.com/openapi-ruby/openapi-ruby/issues/57)) ([359ede1](https://github.com/openapi-ruby/openapi-ruby/commit/359ede108972d5f6928f0f355361f640104fd06f))
+
+
+### Bug Fixes
+
+* **generators:** write components to the configured component path ([#59](https://github.com/openapi-ruby/openapi-ruby/issues/59)) ([51af2e9](https://github.com/openapi-ruby/openapi-ruby/commit/51af2e9afaaaaacf667d1b4286eb8a4c80ff0f01))
+
 ## [4.2.0](https://github.com/openapi-ruby/openapi-ruby/compare/v4.1.0...v4.2.0) (2026-08-19)
 
 
