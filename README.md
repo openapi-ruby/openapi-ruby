@@ -654,7 +654,7 @@ Rails picks up its wiring from the engine. Every other host makes the same calls
 | `openapi_ruby:install` / `:component` generators | ✅ | — | — |
 | `openapi_permit` strong params | ✅ | — | — |
 
-Versions covered by CI: Rails 7.0–8.0, Hanami 2.3 and 3.0, Sinatra 3.2 and 4.2. Working reference apps live in [`spec/dummy`](spec/dummy), [`spec/hanami_dummy`](spec/hanami_dummy), and [`spec/sinatra_dummy`](spec/sinatra_dummy).
+Versions covered by CI: Ruby 3.2–4.0, Rails 7.0–8.0, Hanami 2.3 and 3.0, Sinatra 3.2 and 4.2. Working reference apps live in [`spec/dummy`](spec/dummy), [`spec/hanami_dummy`](spec/hanami_dummy), and [`spec/sinatra_dummy`](spec/sinatra_dummy).
 
 ### Hanami
 
