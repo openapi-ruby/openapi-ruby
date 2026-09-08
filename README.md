@@ -182,6 +182,37 @@ class Schemas::User
 end
 ```
 
+#### Parameter names
+
+The same setting covers parameter names, so parameters match the component keys instead of contradicting them. Declare them in snake_case — that keeps `let(:page_size)` and `params: {page_size: 20}` idiomatic Ruby — and the camelCased name is what reaches both the document and the request:
+
+```ruby
+api_path "/users/{user_id}" do
+  parameter name: :user_id, in: :path, schema: { type: :integer }
+
+  get "List posts" do
+    parameter name: :page_size, in: :query, schema: { type: :integer }
+    # ...
+  end
+end
+```
+
+```yaml
+paths:
+  /users/{userId}:            # template variables travel with the parameter names
+    parameters:
+      - name: userId
+        in: path
+    get:
+      parameters:
+        - name: pageSize
+          in: query
+```
+
+The test DSL sends what the document promises: `GET /users/7?pageSize=20`. Header parameters keep their declared spelling — HTTP header names are conventionally hyphenated and matched case-insensitively, so camelizing them would rename headers nobody asked to rename.
+
+If your API takes snake_case parameters, set `config.camelize_keys = false` (or keep the parameter names camelCased in the declaration, which passes through unchanged either way).
+
 ### Scopes
 
 Assign components to scopes for multiple API specs:
