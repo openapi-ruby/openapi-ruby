@@ -39,6 +39,22 @@ RSpec.describe OpenapiRuby::DSL::Context do
       expect(result["get"]).not_to have_key("parameters")
     end
 
+    it "camelizes path parameter names when camelize_keys is on" do
+      ctx = described_class.new("/users/{user_id}")
+      ctx.parameter(name: :user_id, in: :path, schema: {type: :integer})
+
+      expect(ctx.to_openapi["parameters"][0]["name"]).to eq("userId")
+      expect(ctx.path_parameters[0]["name"]).to eq("user_id")
+    end
+
+    it "keeps path parameter names when camelize_keys is off" do
+      OpenapiRuby.configuration.camelize_keys = false
+      ctx = described_class.new("/users/{user_id}")
+      ctx.parameter(name: :user_id, in: :path, schema: {type: :integer})
+
+      expect(ctx.to_openapi["parameters"][0]["name"]).to eq("user_id")
+    end
+
     it "stores schema_name" do
       ctx = described_class.new("/users", schema_name: :public_api)
 

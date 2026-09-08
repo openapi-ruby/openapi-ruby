@@ -156,8 +156,9 @@ module OpenapiRuby
 
           headers["Accept"] ||= "application/json"
 
-          path_param_names = context.path_parameters.map { |p| p["name"] }
+          path_param_names = context.path_parameters.flat_map { |p| ParameterNames.lookup_names(p) }
           query_params = params.reject { |k, _| path_param_names.include?(k.to_s) }
+          query_params = ParameterNames.rename_keys(query_params, operation.parameters)
 
           if body
             content_type = operation.request_body_definition&.dig("content")&.keys&.first || "application/json"
@@ -248,7 +249,7 @@ module OpenapiRuby
             next if val.nil?
 
             case param["in"]
-            when "query" then params[name] = val
+            when "query" then params[ParameterNames.wire_name(param)] = val
             when "header" then headers[name] = val
             end
           end

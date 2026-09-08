@@ -37,7 +37,7 @@ module OpenapiRuby
         result = {}
         query_params.each do |param|
           name = param["name"]
-          result[name] = @param_values[name] if @param_values.key?(name)
+          result[ParameterNames.wire_name(param)] = @param_values[name] if @param_values.key?(name)
         end
         result
       end

@@ -23,6 +23,29 @@ RSpec.describe OpenapiRuby::DSL::OperationContext do
       expect(result["tags"]).to eq(%w[Users Public])
     end
 
+    it "camelizes parameter names when camelize_keys is on" do
+      op = described_class.new(:get)
+      op.parameter(name: :page_size, in: :query, schema: {type: :integer})
+
+      expect(op.to_openapi["parameters"][0]["name"]).to eq("pageSize")
+      expect(op.parameters[0]["name"]).to eq("page_size")
+    end
+
+    it "leaves header parameter names alone" do
+      op = described_class.new(:get)
+      op.parameter(name: "X-Request_Id", in: :header, schema: {type: :string})
+
+      expect(op.to_openapi["parameters"][0]["name"]).to eq("X-Request_Id")
+    end
+
+    it "keeps parameter names when camelize_keys is off" do
+      OpenapiRuby.configuration.camelize_keys = false
+      op = described_class.new(:get)
+      op.parameter(name: :page_size, in: :query, schema: {type: :integer})
+
+      expect(op.to_openapi["parameters"][0]["name"]).to eq("page_size")
+    end
+
     it "includes operationId" do
       op = described_class.new(:get)
       op.operationId("listUsers")

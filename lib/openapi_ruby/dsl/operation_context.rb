@@ -93,7 +93,7 @@ module OpenapiRuby
         result["summary"] = @summary if @summary
         result["tags"] = @tags_list if @tags_list.any?
         result.merge!(@metadata)
-        result["parameters"] = @parameters if @parameters.any?
+        result["parameters"] = ParameterNames.parameters_for_document(@parameters) if @parameters.any?
         result["security"] = @security_list if @security_list
 
         result["requestBody"] = build_request_body if @request_body_definition
