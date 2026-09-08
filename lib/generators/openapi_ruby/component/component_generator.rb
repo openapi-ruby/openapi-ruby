@@ -12,10 +12,30 @@ module OpenapiRuby
 
       def create_component_file
         template "component.rb.tt",
-          File.join("app/api_components", component_type, "#{file_name}.rb")
+          File.join(component_path, component_type, "#{file_name}.rb")
       end
 
       private
+
+      # Components::Loader only looks under the configured paths, so anything
+      # written to a hardcoded app/api_components is invisible on hosts that
+      # default elsewhere (Hanami) or configure their own.
+      def component_path
+        path = OpenapiRuby.configuration.component_paths.first ||
+          Configuration.default_component_paths.first
+        relativize(path)
+      end
+
+      # An initializer may hold an absolute Rails.root.join(...) path; Thor
+      # reports the destination verbatim, and an absolute one reads as noise.
+      def relativize(path)
+        pathname = Pathname.new(path)
+        return path unless pathname.absolute?
+
+        pathname.relative_path_from(Pathname.new(destination_root)).to_s
+      rescue ArgumentError
+        path
+      end
 
       def class_name
         name.camelize
