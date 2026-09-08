@@ -24,6 +24,23 @@ RSpec.describe OpenapiRuby::Core::DocumentBuilder do
       expect(doc.to_h["components"]["schemas"]["User"]).to eq({"type" => "object"})
     end
 
+    it "camelizes path template variables when camelize_keys is on" do
+      builder = described_class.new(info: {title: "API", version: "1.0"})
+
+      builder.add_path("/users/{user_id}", {"get" => {"summary" => "Get user"}})
+
+      expect(builder.to_h["paths"].keys).to eq(["/users/{userId}"])
+    end
+
+    it "keeps path template variables when camelize_keys is off" do
+      OpenapiRuby.configuration.camelize_keys = false
+      builder = described_class.new(info: {title: "API", version: "1.0"})
+
+      builder.add_path("/users/{user_id}", {"get" => {"summary" => "Get user"}})
+
+      expect(builder.to_h["paths"].keys).to eq(["/users/{user_id}"])
+    end
+
     it "deep merges multiple operations on same path" do
       builder = described_class.new(info: {title: "API", version: "1.0"})
 

@@ -90,6 +90,7 @@ module OpenapiRuby
 
           # Build query params (exclude path params)
           query_params = params.reject { |k, _| path_param_names(context).include?(k.to_s) }
+          query_params = ParameterNames.rename_keys(query_params, operation.parameters)
 
           # Execute the request
           if body
@@ -180,7 +181,7 @@ module OpenapiRuby
         end
 
         def path_param_names(context)
-          context.path_parameters.map { |p| p["name"] }
+          context.path_parameters.flat_map { |p| ParameterNames.lookup_names(p) }
         end
 
         def resolve_base_path(schema_name)

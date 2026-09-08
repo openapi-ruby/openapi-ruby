@@ -17,6 +17,7 @@ module OpenapiRuby
       end
 
       def add_path(template, operations)
+        template = ParameterNames.in_template(template)
         @paths[template] ||= {}
         @paths[template].deep_merge!(operations)
       end

@@ -69,7 +69,7 @@ module OpenapiRuby
       def accounted_keys(context, method)
         declared = context.path_parameters + (context.operations[method.to_s]&.parameters || [])
 
-        template_params(context) | declared.filter_map { |param| param["name"]&.to_s }
+        template_params(context) | declared.flat_map { |param| OpenapiRuby::ParameterNames.lookup_names(param) }
       end
 
       def template_params(context)

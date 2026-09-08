@@ -39,17 +39,28 @@ module OpenapiRuby
 
       private
 
+      # A value may arrive under the declared name or the camelized wire name,
+      # depending on whether the caller wrote it or an adapter already renamed
+      # it for the request. Both spellings resolve.
       def extract_param_value(param, params, headers, path_params)
-        name = param["name"]
+        names = ParameterNames.lookup_names(param)
 
         case param["in"]
         when "query"
-          params[name.to_sym] || params[name.to_s]
+          fetch_any(params, names)
         when "path"
-          path_params[name.to_sym] || path_params[name.to_s]
+          fetch_any(path_params, names)
         when "header"
-          headers[name] || headers[name.downcase]
+          fetch_any(headers, names.flat_map { |name| [name, name.downcase] })
         end
+      end
+
+      def fetch_any(store, names)
+        names.each do |name|
+          value = store[name.to_sym] || store[name.to_s]
+          return value if value
+        end
+        nil
       end
 
       def validate_request_body(operation, body)

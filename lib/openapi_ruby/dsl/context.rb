@@ -32,7 +32,7 @@ module OpenapiRuby
       def to_openapi
         result = {}
 
-        result["parameters"] = @path_parameters if @path_parameters.any?
+        result["parameters"] = ParameterNames.parameters_for_document(@path_parameters) if @path_parameters.any?
 
         @operations.each do |verb, op|
           result[verb] = op.to_openapi
