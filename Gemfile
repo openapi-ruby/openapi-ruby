@@ -14,6 +14,7 @@ end
 group :test do
   gem "minitest"
   gem "rack-test"
+  gem "sorbet-runtime"
   rails_version = ENV.fetch("RAILS_VERSION", nil)
   if rails_version
     gem "rails", "~> #{rails_version}.0"
